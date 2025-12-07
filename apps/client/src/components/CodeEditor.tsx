@@ -24,6 +24,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ yDoc, provider, onEditor
         if (onEditorMount) onEditorMount(editorInstance, monaco);
     };
 
+    // Effect 1: Bind Yjs to Monaco Editor (handles content sync)
     useEffect(() => {
         if (!yDoc || !provider || !editor) return;
 
@@ -59,14 +60,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ yDoc, provider, onEditor
             });
 
             console.log('Debug: Binding created successfully');
-
-            // cleanup listener on effect dispose
-            // actually we can attach it to the bindingRef or just cleanup here?
-            // MonacoBinding doesn't handle this custom field so we must do it manually.
-            // We need to return a cleanup function that disposes this listener.
-            // However, the outer cleanup function runs when effect dependencies change.
-            // Let's store disposable in a ref or simply add it to a cleanup list if we were robust.
-            // For now, simpler:
             (bindingRef.current as any)._customDisposable = disposable;
 
         } catch (err) {
@@ -79,7 +72,18 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ yDoc, provider, onEditor
             bindingRef.current?.destroy();
             bindingRef.current = null;
         };
-    }, [yDoc, provider, language, editor]); // Re-bind if language changes or editor mounts
+    }, [yDoc, provider, editor]); // Removed 'language' dependency!
+
+    // Effect 2: Handle Language Updates specifically
+    useEffect(() => {
+        if (!editor || !monacoRef.current) return;
+
+        const model = editor.getModel();
+        if (model) {
+            console.log('Debug: Updating model language to', language);
+            monacoRef.current.editor.setModelLanguage(model, language);
+        }
+    }, [language, editor]);
 
     return (
         <Box sx={{ flex: 1, minHeight: 0 }}>
