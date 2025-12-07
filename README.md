@@ -9,7 +9,7 @@ A real-time collaborative coding environment designed for technical interviews a
     -   **JavaScript**: Secure execution in a Web Worker sandboxed environment.
     -   **TypeScript**: In-browser transpilation to JavaScript using Monaco services.
     -   **Python**: Client-side execution using Pyodide (WASM).
--   **Live Awareness**: See who else is currently active in the session.
+-   **Live Awareness**: See who is active in the session and when they are **typing**.
 -   **Terminal Output**: Real-time `stdout` and `stderr` capturing.
 -   **Stateless**: No database required; sessions are ephemeral and exist only while active.
 -   **Modern UI**: Built with React, Vite, and Google Material Design (MUI).
@@ -23,6 +23,7 @@ A real-time collaborative coding environment designed for technical interviews a
 -   **Editor**: Monaco Editor (`@monaco-editor/react`)
 -   **Collaboration**: Yjs, `y-websocket`, `y-monaco`
 -   **State Management**: Zustand
+-   **Testing**: Vitest, React Testing Library
 -   **Runtime**: Web Workers, Pyodide
 
 ### Backend (`apps/server`)
@@ -30,6 +31,7 @@ A real-time collaborative coding environment designed for technical interviews a
 -   **Framework**: Express.js
 -   **WebSockets**: `ws` library (handling Yjs sync)
 -   **Language**: TypeScript
+-   **Testing**: Vitest, Supertest
 
 ### Shared (`packages/shared`)
 -   Shared TypeScript types and contracts.
@@ -65,9 +67,21 @@ npm run dev
 -   **Frontend**: Open [http://localhost:3000](http://localhost:3000)
 -   **Backend**: Running on [http://localhost:3001](http://localhost:3001)
 
-### Integration Tests
+### Testing
 
-To verify the real-time WebSocket synchronization logic:
+Run the full test suite (Unit + Integration):
+
+```bash
+npm run test
+```
+
+Generate Code Coverage reports:
+
+```bash
+npm run test:coverage
+```
+
+To verify the real-time WebSocket synchronization logic specifically:
 
 ```bash
 npm run test:integration --workspace=apps/server
