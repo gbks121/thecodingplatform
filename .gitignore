@@ -16,3 +16,10 @@ yarn-error.log*
 # OS
 .DS_Store
 Thumbs.db
+
+# Test Coverage
+coverage
+.nyc_output
+*.lcov
+reports
+junit.xml
