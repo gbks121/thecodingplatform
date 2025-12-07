@@ -1,8 +1,8 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Box, AppBar, Toolbar, Typography, Button, IconButton,
-    Select, MenuItem, CircularProgress, Tooltip, Paper, Stack
+    Select, MenuItem, CircularProgress, Tooltip, Stack
 } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -14,12 +14,13 @@ import { useCodeRunner } from '../hooks/useCodeRunner';
 import { CodeEditor } from '../components/CodeEditor';
 import { OutputPanel } from '../components/OutputPanel';
 import { ActiveUsersPanel } from '../components/ActiveUsersPanel';
+import { ChatPanel } from '../components/ChatPanel';
 import { Language } from '@thecodingplatform/shared';
 
 const CodingSession: React.FC = () => {
     const { sessionId } = useParams<{ sessionId: string }>();
     const navigate = useNavigate();
-    const { user, language, setLanguage, clearLogs } = useStore();
+    const { user, language, setSessionId, clearLogs } = useStore();
     const { provider, yDoc, isSynced } = useYjs(sessionId || null, user);
     const { runCode, isRunning } = useCodeRunner();
 
@@ -32,12 +33,14 @@ const CodingSession: React.FC = () => {
         languageRef.current = language;
     }, [language]);
 
-    // If no user, redirect to landing (simple auth guard)
+    // Auth Guard: If no user, redirect to Landing Page with ?join param
     useEffect(() => {
-        if (!user) {
-            navigate('/');
+        if (!user && sessionId) {
+            navigate(`/?join=${sessionId}`);
+        } else if (sessionId) {
+            setSessionId(sessionId);
         }
-    }, [user, navigate]);
+    }, [user, sessionId, navigate, setSessionId]);
 
     const handleEditorMount = (editor: any, monaco: any) => {
         editorRef.current = editor;
@@ -104,6 +107,7 @@ const CodingSession: React.FC = () => {
         }
     };
 
+    // Before user is confirmed, show nothing or loading (though effect redirects quickly)
     if (!user || !sessionId) return null;
 
     return (
@@ -160,14 +164,24 @@ const CodingSession: React.FC = () => {
                             onEditorMount={handleEditorMount}
                         />
                     </Box>
-                    <Box sx={{ flex: 1, minHeight: '200px', borderTop: 1, borderColor: 'divider' }}>
+                    <Box sx={{
+                        flex: 1,
+                        minHeight: '200px',
+                        borderTop: '4px solid #121212',
+                        bgcolor: '#1e1e1e'
+                    }}>
                         <OutputPanel />
                     </Box>
                 </Box>
 
-                {/* Right: Active Users */}
-                <Box sx={{ width: 250, display: { xs: 'none', md: 'block' } }}>
-                    <ActiveUsersPanel />
+                {/* Right: Active Users & Chat */}
+                <Box sx={{ width: 300, display: { xs: 'none', md: 'flex' }, flexDirection: 'column', borderLeft: 1, borderColor: 'divider' }}>
+                    <Box sx={{ flexShrink: 0 }}>
+                        <ActiveUsersPanel />
+                    </Box>
+                    <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                        <ChatPanel yDoc={yDoc} />
+                    </Box>
                 </Box>
             </Box>
         </Box>
