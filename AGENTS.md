@@ -1,307 +1,416 @@
 # Role Definition
-Act as a Principal Full-Stack Software Architect and Engineer. You are an expert in building real-time collaborative applications using React, WebSockets, CRDTs, WebAssembly, and modern design systems (Google Material Design).
+Act as a Principal Full-Stack Software Architect and Engineer. You are an expert in building real-time collaborative monorepos using Turborepo, React, Express, WebSockets, CRDTs, WebAssembly, and Google Material Design.
 
 # Project Context
-We are building an MVP for **"The Coding Platform"**, an ephemeral, real-time collaborative coding interview and practice environment. The application provides:
+We are building an MVP for **"The Coding Platform"**, an ephemeral, real-time collaborative coding interview and practice environment.
+
+Key capabilities:
 - A marketing-style landing page with graphics and feature descriptions.
-- A clear entry point for users to either create a new session or join an existing one using a session ID.
-- A collaborative coding environment where multiple users can edit code together, see real-time changes, execute code in the browser, and view active participants in the session.
+- Clear flows to **create a new session** or **join an existing session** using a session ID.
+- A collaborative coding environment where multiple users:
+  - Edit code together with real-time updates.
+  - Execute code fully in the browser via WebAssembly.
+  - See a live list of active users and code output.
 
-The system is initially stateless and ephemeral: no long-term persistence or authentication is required in this phase. Code execution happens entirely on the client side using WebAssembly (WASM) for safety and reduced infrastructure cost.
+The initial phase is **ephemeral and stateless**: no authentication or long-term persistence. All code execution is client-side for security and low infrastructure cost.
 
-# Tech Stack & Rules
+---
 
-## Frontend
+# Tech Stack & Architectural Rules
+
+## Monorepo & Tooling
+- **Repository Layout:** Turborepo-style monorepo with `apps/` for deployable apps and `packages/` for shared code.
+- **Build Orchestration:** Turborepo.
+- **Package Manager:** pnpm workspaces.
+- **Language:** TypeScript across frontend, backend, and shared packages.
+
+## Frontend (apps/client)
 - **Framework:** React 18+ with Vite (TypeScript).
 - **Routing:** `react-router-dom` with at least:
-  - `/` for the landing page.
-  - `/session/:sessionId` for the coding environment.
-- **State Management:** Zustand for global UI and session state (e.g., selected language, user name, output logs, active users list).
-- **Styling & Design System:**
-  - Use **Google Material Design** principles consistently.
-  - Use a React UI library aligned with Material Design (e.g., `@mui/material` + `@mui/icons-material`).
-  - Tailwind CSS may be used for utility-level layout tweaks if desired, but Material Design components and patterns should dominate the UX.
-- **Icons:** Prefer Material Icons; Lucide can be used where appropriate but Material should be primary.
-- **Editor:** `monaco-editor` via `@monaco-editor/react`.
+  - `/` – Landing page.
+  - `/session/:sessionId` – Collaborative coding environment.
+- **State Management:** Zustand for:
+  - User name.
+  - Session ID.
+  - Selected language.
+  - Execution output logs.
+  - Active users list (from presence/awareness).
+- **UI & Design System:**
+  - **Google Material Design** as the primary design language.
+  - UI Library: `@mui/material` + `@mui/icons-material`.
+- **Editor:**
+  - `monaco-editor` via `@monaco-editor/react`.
+  - Language modes for JavaScript, Python.
 - **Real-time Collaboration:**
-  - Core CRDT: `yjs`.
-  - WebSocket Provider: `y-websocket` (client).
-  - Editor Binding: `y-monaco` to bind a Yjs text type to the Monaco editor.
+  - CRDT: `yjs`.
+  - Provider: `y-websocket` (client).
+  - Editor Binding: `y-monaco` to bind Yjs document to Monaco model.
 
-## Backend
+## Backend (apps/server)
 - **Runtime:** Node.js.
-- **Framework:** Express.js.
+- **Framework:** Express.js + TypeScript.
 - **Real-time Transport:**
-  - Use `ws` integrated with the Express HTTP server.
-  - Use `y-websocket`’s `setupWSConnection` utility to manage collaboration documents (rooms keyed by `sessionId`).
-- **API Endpoints:**
-  - `GET /health` to verify server status.
-  - Optional: `POST /session` can be implemented later if server-side session creation is desired; initially, session IDs can be generated on the client.
+  - HTTP server created from Express app.
+  - `ws` WebSocket server attached to HTTP server.
+  - `y-websocket` `setupWSConnection` for collaborative document rooms (keyed by `sessionId`).
+- **HTTP API (MVP):**
+  - `GET /health` – simple health check endpoint.
+  - No database or auth in this phase.
 
-## Code Execution (Client-side WASM)
-- **Supported Languages:** JavaScript, TypeScript, Python.
+## Code Execution (Client-side)
+- **Supported Programming Languages:**
+  - JavaScript.
+  - Python.
 - **Execution Strategy:**
-  - JavaScript / TypeScript:
-    - Use Web Workers for sandboxed execution.
-    - TypeScript should be compiled/transpiled in-browser (e.g., using `typescript` package or a lightweight transpiler) before executing as JavaScript in a worker.
-  - Python:
-    - Use Pyodide (from CDN or npm) to execute Python code in the browser.
-- All code execution must run outside the main UI thread (Web Workers) to keep the UI responsive.
+  - **JavaScript:**
+    - Execute in a Web Worker sandbox.
+    - Capture `console.log`, errors, and send back to main thread.
+  - **Python:**
+    - Use Pyodide (preferably loaded via CDN).
+    - Run code in Pyodide and capture stdout/stderr.
+- All execution must occur off the main thread (Web Workers) to keep the UI responsive.
 
-# Core User Flows & UX Requirements
+---
 
-## Landing Page ("/")
-- Design a modern, visually appealing landing page following **Google Material Design**:
-  - Use a hero section with a prominent title, subtitle, and call-to-action buttons.
-  - Include at least one illustrative graphic or icon-based section describing key features:
+# Core User Flows & UX Details
+
+## Landing Page (`/`)
+- Use Google Material Design throughout:
+  - Material AppBar, hero section, cards, responsive layout, and typography.
+- Content:
+  - Branded hero section for **"The Coding Platform"** with title, subtitle, and illustration/graphic.
+  - Feature highlights:
     - Real-time collaboration.
-    - In-browser code execution.
-    - Multi-language support (JavaScript, TypeScript, Python).
-    - Ephemeral, interview-focused sessions.
-- Main CTAs:
-  - **"Create New Session"** button.
-  - **"Join Existing Session"** button.
-- When the user chooses **Create New Session**:
-  - Show a modal or dedicated form section:
-    - Inputs:
-      - `Name` (required).
-      - `Preferred Programming Language` (select: JavaScript, TypeScript, Python).
-    - On submit:
-      - Generate a unique `sessionId` (e.g., UUID or nanoid) on the client.
-      - Navigate to `/session/:sessionId`, passing the user name and selected language into state (e.g., via URL search params or a shared store).
-- When the user chooses **Join Existing Session**:
-  - Show a modal or dedicated form section:
-    - Inputs:
-      - `Name` (required).
-      - `Session ID` (required).
-    - On submit:
-      - Navigate to `/session/:sessionId` with the provided sessionId and user name.
+    - In-browser execution.
+    - Supported languages (JS/Python).
+    - No install, just share a link.
+- Primary actions:
+  - **Create New Session** (button).
+  - **Join Existing Session** (button).
 
-## Coding Environment ("/session/:sessionId")
-- Layout should mirror a coding IDE using Material Design components for scaffolding and controls.
-- Required sections:
-  1. **Primary Code Editor Area**:
-     - Central and largest region of the screen.
-     - Monaco editor with language mode determined by current selected language.
-     - Real-time collaborative editing via Yjs + y-websocket:
-       - All connected users in a session share the same document.
-       - Edits appear live for everyone.
-  2. **Output Panel** (smaller section):
-     - Displays stdout, stderr, and runtime errors from the WebAssembly/worker-based execution.
-     - Use a Material Design card or panel at the bottom or right side.
-  3. **Active Users Panel** (smaller section):
-     - Shows a list of currently active users in the session, using their provided names.
-     - Each user may be represented with an avatar (initials) and an online indicator.
-     - This list should update in real time as users join/leave.
-- Additional controls:
-  - Language selector (JavaScript, TypeScript, Python).
-  - "Run Code" button:
-    - Executes the current code in the selected language using the appropriate client-side runner.
-    - Streams or prints results to the Output Panel.
-  - Session information display:
-    - Show `sessionId` prominently with a "Copy" button to share the link.
+### Create New Session Flow
+- Triggered from the landing page via a Material dialog or dedicated section.
+- Form fields:
+  - `Name` (required).
+  - `Preferred Programming Language` (select: JavaScript, Python).
+- On submit:
+  - Generate a unique `sessionId` on the client (e.g., UUID/nanoid).
+  - Store `name`, `sessionId`, and `language` in Zustand.
+  - Navigate to `/session/:sessionId`.
+  - The session is created implicitly by users connecting via Yjs/Y-websocket.
 
-# State & Data Model
+### Join Existing Session Flow
+- Triggered from the landing page via a second Material dialog or section.
+- Form fields:
+  - `Name` (required).
+  - `Session ID` (required).
+- On submit:
+  - Store `name` and `sessionId` in Zustand.
+  - Navigate to `/session/:sessionId`.
+  - The client connects to the existing collaborative Yjs document for that `sessionId`.
 
-## Client-side State (Zustand)
+## Coding Environment (`/session/:sessionId`)
+Overall layout should resemble a lightweight IDE, with the code editor as the dominant pane and secondary panels for output and users.
+
+Required sections:
+1. **Primary Code Window**
+   - Monaco Editor as the central, largest panel.
+   - Language mode reflects current language (JS/Python).
+   - Real-time collaborative editing:
+     - Backed by Yjs document.
+     - Synchronized via y-websocket and the backend WebSocket server.
+2. **Output Panel**
+   - Smaller section (e.g., bottom or side) using a Material card/panel.
+   - Displays:
+     - Standard output (stdout).
+     - Standard error (stderr).
+     - Execution/runtime errors.
+   - Entries displayed with timestamps and different visual styles.
+3. **Active Users Panel**
+   - Smaller section, possibly in a side drawer or right-hand panel.
+   - Shows list of active users in the session:
+     - Name.
+     - Optional avatar (initials).
+     - Online indicator.
+   - Updated in real time as users join/leave, using Yjs awareness or equivalent presence mechanism.
+
+Controls:
+- **Language Selector:** Dropdown or segmented control for JS/Python.
+- **Run Code Button:** Executes code in the current language using client-side runners and streams results into Output Panel.
+- **Session Info:**
+  - Display the current `sessionId`.
+  - Provide a “Copy link” button to share the session URL.
+
+---
+
+# State & Data Modeling
+
+## Client-Side State (Zustand)
+Design a store with at least:
+
 - `user`: `{ name: string }`.
 - `session`: `{ id: string }`.
-- `language`: union type `"javascript" | "typescript" | "python"`.
-- `output`: list of log entries `{ id: string; type: "stdout" | "stderr" | "system"; message: string; timestamp: number }`.
-- `activeUsers`: array of `{ id: string; name: string }`.
-- UI flags such as loading states for Pyodide and Web Worker initialization.
+- `language`: `"javascript" | "python"`.
+- `output`: `Array<{ id: string; type: "stdout" | "stderr" | "system"; message: string; timestamp: number }>`).
+- `activeUsers`: `Array<{ id: string; name: string }>` – may map to Yjs awareness data.
+- UI flags:
+  - `isPyodideReady: boolean`.
+  - `isWorkerReady: boolean`.
+  - Loading/error states for connection and execution.
 
-## Real-time Documents (Yjs)
-- For each `sessionId`, maintain:
-  - A shared text document for the code buffer.
-  - An optional shared array or map for chat or system messages.
-  - A shared structure for presence (optional; some presence data may be handled via ephemeral messages or provider-level awareness).
+## Real-Time Document (Yjs)
+Per `sessionId`, maintain:
+- A Yjs `Text` type for code content.
+- Awareness/presence for active users (name, color, cursor position if desired).
 
-# Coding Standards
+---
+
+# Coding Standards & Practices
 
 1. **React & TypeScript**
-   - Only functional components with hooks.
-   - Strict TypeScript:
-     - No `any` unless absolutely necessary and documented.
-     - Define types/interfaces for:
-       - WebSocket messages.
-       - Yjs document structures.
-       - Execution results.
-2. **Design & UX**
-   - Apply Google Material Design as the primary design language:
-     - Use Material typography, spacing, and elevation.
-     - Use a consistent color theme (primary/secondary) for buttons and accents.
-   - Ensure responsive layout that works on modern desktops and large tablets (mobile support optional but a plus).
-3. **Separation of Concerns**
-   - Create dedicated hooks:
-     - `useYjsCollaboration` for connecting to rooms, managing docs, and handling awareness.
-     - `useCodeRunner` for initializing and managing Web Workers / Pyodide.
-   - Keep view components thin; move logic into hooks and utility modules.
-4. **Performance**
-   - Lazy load Monaco, Pyodide, and any heavy libraries.
-   - Use memoization (`useMemo`, `useCallback`) around expensive computations and frequently passed callbacks.
-5. **Error Handling & Resilience**
-   - Show user-friendly error messages when:
-     - WebSocket connection drops.
-     - Pyodide fails to initialize.
-     - Code execution throws runtime errors.
-   - Use Material snackbars/dialogs for transient error notifications.
+   - Use only functional components and React Hooks.
+   - Enable strict TypeScript mode.
+   - No `any` unless clearly justified and documented.
+   - Strongly type:
+     - WebSocket messages.
+     - Execution results.
+     - Yjs document structures and awareness payloads.
 
-# Project File Structure
-Use a two-package structure (client + server) that can be managed via a simple workspace or as separate directories.
+2. **Design & UX**
+   - Follow Google Material Design patterns for:
+     - AppBar, Buttons, Dialogs, Cards, Typography, Elevation.
+   - Ensure responsive layout:
+     - Target desktop and tablet; mobile-friendly layout is a plus.
+   - Use consistent theming:
+     - Define MUI theme with primary/secondary palette and typography.
+
+3. **Architecture & Separation of Concerns**
+   - Create custom hooks:
+     - `useYjsCollaboration` – manages Yjs doc, provider, and awareness.
+     - `useCodeRunner` – manages Web Workers and Pyodide lifecycles.
+     - `useSessionState` – negotiates reading/writing Zustand + URL params.
+   - Keep UI components primarily declarative; push business logic into hooks and shared utilities.
+
+4. **Performance**
+   - Lazy-load heavy dependencies:
+     - Monaco Editor.
+     - Pyodide.
+   - Use memoization (`useMemo`, `useCallback`) in performance-sensitive components.
+   - Avoid unnecessary re-renders of the editor and large lists.
+
+5. **Error Handling**
+   - Use Material Snackbars/Dialogs for errors:
+     - WebSocket connection lost/restored.
+     - Pyodide initialization failure.
+     - Execution errors.
+   - Provide clear, user-friendly messages.
+
+---
+
+# Proposed File Structure
+
+Use a Turborepo-style monorepo with `apps/` and `packages/`:
 
 ```
+
 /
-├── packages/
-│ ├── client/ # React + Vite (The Coding Platform UI)
+├── apps/
+│ ├── client/ # React + Vite frontend
 │ │ ├── src/
 │ │ │ ├── components/
 │ │ │ │ ├── landing/
-│ │ │ │ │ ├── LandingPage.tsx # Marketing + entry actions
-│ │ │ │ │ └── FeatureSections.tsx # Graphics & feature info
+│ │ │ │ │ ├── LandingPage.tsx
+│ │ │ │ │ └── CreateJoinDialogs.tsx
 │ │ │ │ ├── session/
-│ │ │ │ │ ├── CodeEditor.tsx # Monaco editor
-│ │ │ │ │ ├── OutputPanel.tsx # Execution output
-│ │ │ │ │ ├── ActiveUsersPanel.tsx # List of active users
-│ │ │ │ │ └── SessionLayout.tsx # Overall layout shell
-│ │ │ │ └── common/
-│ │ │ │ ├── AppBar.tsx # Material top bar
-│ │ │ │ └── Dialogs.tsx # Create/Join modals
+│ │ │ │ │ ├── SessionLayout.tsx
+│ │ │ │ │ ├── CodeEditor.tsx
+│ │ │ │ │ ├── OutputPanel.tsx
+│ │ │ │ │ └── ActiveUsersPanel.tsx
+│ │ │ │ └── ui/
+│ │ │ │ └── AppBar.tsx
 │ │ │ ├── hooks/
-│ │ │ │ ├── useYjsCollaboration.ts # Yjs + y-websocket logic
-│ │ │ │ ├── useCodeRunner.ts # JS/TS/Python execution
-│ │ │ │ └── useActiveUsers.ts # Presence handling
+│ │ │ │ ├── useYjsCollaboration.ts
+│ │ │ │ ├── useCodeRunner.ts
+│ │ │ │ └── useSessionState.ts
 │ │ │ ├── stores/
-│ │ │ │ └── useAppStore.ts # Zustand store
+│ │ │ │ └── useAppStore.ts
 │ │ │ ├── lib/
-│ │ │ │ ├── session.ts # sessionId helpers
-│ │ │ │ ├── languages.ts # language configs
-│ │ │ │ └── websocket.ts # WS URL helpers
-│ │ │ ├── routes/
-│ │ │ │ ├── Router.tsx # react-router-dom setup
-│ │ │ │ ├── LandingRoute.tsx
-│ │ │ │ └── SessionRoute.tsx
+│ │ │ │ ├── sessionUtils.ts # sessionId helpers, URL helpers
+│ │ │ │ └── languageConfig.ts # language → Monaco mode, runner
 │ │ │ ├── App.tsx
 │ │ │ └── main.tsx
+│ │ ├── tests/ 
 │ │ ├── index.html
-│ │ └── vite.config.ts
-│ └── server/ # Express + y-websocket
-│ ├── src/
-│ │ ├── index.ts # Express app + HTTP server
-│ │ └── wsServer.ts # WS upgrade + setupWSConnection
-│ ├── tests/
-│ │ └── integration/
-│ │ ├── collaboration.test.ts # Integration tests
-│ │ └── health.test.ts
+│ │ ├── package.json
+│ │ ├── vite.config.ts
+│ │ └── tsconfig.json
+│ └── server/ # Express + WebSocket backend
+│ │	├── src/
+│ │ ├── index.ts # Entry point: create HTTP+WS server
+│ │ ├── app.ts # Express app setup (middleware, routes)
+│ │ ├── routes/
+│ │ │ └── health.route.ts # GET /health
+│ │ ├── websocket/
+│ │ │ └── yjsWebsocket.ts # ws server + setupWSConnection
+│ │ └── config/
+│ │ └── env.ts # Port, allowed origins, etc. (optional)
+│ │	├── tests/
+│ │   └── integration/
+│ │ 	└── collaboration.test.ts
 │ ├── package.json
 │ └── tsconfig.json
-├── package.json
+├── packages/
+│ └── shared/ # Shared types & utils
+│ ├── src/
+│ │ ├── types/
+│ │ │ ├── session.ts # Session + presence types
+│ │ │ ├── languages.ts # Language union/types
+│ │ │ └── messages.ts # WebSocket message contracts
+│ │ └── utils/
+│ │ └── uuid.ts # UUID/nanoid wrapper
+│ ├── package.json
+│ └── tsconfig.json
+├── package.json # Root workspace
+├── turbo.json # Turborepo configuration
+├── pnpm-workspace.yaml # pnpm workspaces
+├── tsconfig.json # Root TS config (base)
+├── .gitignore
 └── README.md
+
 ```
 
+---
+
+# Setup & Tooling
+
+## Root Setup
+- Initialize Turborepo (or similar) and pnpm workspaces.
+- Configure `pnpm-workspace.yaml` for `apps/*` and `packages/*`.
+- Configure `turbo.json` with pipelines:
+  - `build`, `dev`, `test`, `lint` for `apps/client`, `apps/server`, `packages/shared`.
+
+## Dependencies (examples)
+
+**Client:**
+- React, React DOM, Vite, TypeScript, React Router.
+- `@mui/material`, `@mui/icons-material`.
+- `@monaco-editor/react`, `monaco-editor`.
+- `yjs`, `y-websocket`, `y-monaco`.
+- `zustand`.
+
+**Server:**
+- `express`, `ws`, `y-websocket`.
+- TypeScript, `ts-node`, `nodemon` (dev).
+
+**Shared:**
+- TypeScript.
+
+---
 
 # Step-by-Step Implementation Plan
 
-1. **Scaffold Project**
-   - Initialize the `client` (React + Vite + TypeScript) and `server` (Express + TypeScript).
-   - Install dependencies:
-     - Client: React, React DOM, `react-router-dom`, `@mui/material`, `@mui/icons-material`, `@monaco-editor/react`, `yjs`, `y-websocket`, Zustand, and any worker/pyodide helpers.
-     - Server: Express, `ws`, `y-websocket`, `ts-node` or equivalent tooling.
+1. **Monorepo Initialization**
+   - Set up Turborepo + pnpm workspaces.
+   - Create `apps/client`, `apps/server`, `packages/shared`.
+   - Configure TypeScript base config in root and extend in apps/packages.
 
-2. **Implement Landing Page (The Coding Platform)**
-   - Build `LandingPage.tsx`:
-     - Hero section with app name "The Coding Platform", tagline, and feature overview.
-     - Feature sections with Material cards/icons describing:
-       - Real-time collaboration.
-       - Code execution in the browser.
-       - Supported languages (JavaScript, TypeScript, Python).
-   - Implement create/join flows using Material dialogs:
-     - **Create Session Dialog**:
+2. **Shared Types & Utilities**
+   - In `packages/shared`, define:
+     - Supported languages enum/union.
+     - Session and presence types.
+     - WebSocket message contracts.
+   - Export these types for use in both frontend and backend.
+
+3. **Backend: Express + Yjs WebSocket**
+   - `app.ts`:
+     - Create Express app.
+     - Configure middleware (JSON, CORS for dev).
+     - Register routes (`/health`).
+   - `routes/health.route.ts`:
+     - Implement `GET /health` returning simple JSON.
+   - `websocket/yjsWebsocket.ts`:
+     - Create and export a function that:
+       - Attaches a `ws` server to the HTTP server.
+       - For each new WS connection, calls `setupWSConnection` from `y-websocket`, using `sessionId` from URL/path/query as room key.
+   - `index.ts`:
+     - Import `app` from `app.ts`.
+     - Create HTTP server from `app`.
+     - Call the yjs websocket setup function.
+     - Start listening on configured port.
+
+4. **Frontend: Landing Page**
+   - Implement `LandingPage.tsx`:
+     - Material AppBar + hero section + feature cards.
+     - "Create New Session" and "Join Existing Session" buttons.
+   - Implement `CreateJoinDialogs.tsx`:
+     - Create Session dialog:
        - Name input.
-       - Language dropdown.
-       - On submit:
-         - Generate `sessionId`.
-         - Persist name, language, and sessionId in Zustand.
-         - Navigate to `/session/:sessionId`.
-     - **Join Session Dialog**:
+       - Language selector.
+       - On submit, generate `sessionId`, update Zustand, navigate to `/session/:sessionId`.
+     - Join Session dialog:
        - Name input.
-       - SessionId input.
-       - On submit:
-         - Persist name and sessionId in Zustand.
-         - Navigate to `/session/:sessionId`.
+       - Session ID input.
+       - On submit, update Zustand, navigate to `/session/:sessionId`.
 
-3. **Express + WebSocket Server**
-   - Implement `index.ts` to:
-     - Create an Express app.
-     - Define `GET /health` for status checks.
-     - Create an HTTP server and attach Express.
-   - Implement `wsServer.ts`:
-     - Initialize a `ws` WebSocket server attached to the HTTP server.
-     - On new connections, call `setupWSConnection` from `y-websocket` with the appropriate doc name (e.g., `sessionId` from URL path or query).
-   - Ensure CORS and proper configuration so the client can connect during development.
+5. **Frontend: Collaborative Session View**
+   - `useYjsCollaboration.ts`:
+     - Initialize Yjs `Doc` using `sessionId`.
+     - Connect to y-websocket server via WebSocket URL.
+     - Expose shared text and awareness.
+   - `CodeEditor.tsx`:
+     - Use `@monaco-editor/react`.
+     - Bind Monaco model to Yjs text via `y-monaco`.
+     - Configure language mode from Zustand `language`.
+   - `ActiveUsersPanel.tsx`:
+     - Read awareness data, map to user list.
+   - `OutputPanel.tsx`:
+     - Read output log array from Zustand and display in Material list.
+   - `SessionLayout.tsx`:
+     - Compose AppBar, CodeEditor, OutputPanel, ActiveUsersPanel.
+     - Ensure editor is primary area; others are smaller sections (e.g., using CSS grid or a panel library).
 
-4. **Collaborative Editor & Presence**
-   - Implement `useYjsCollaboration`:
-     - Create a Yjs `Doc` per session.
-     - Connect to the WebSocket provider (y-websocket) using the `sessionId` as the room key.
-     - Expose:
-       - A shared text type for the code buffer.
-       - Awareness/presence APIs for tracking active users.
-   - Implement `CodeEditor.tsx`:
-     - Integrate `@monaco-editor/react`.
-     - Bind the editor model to the Yjs text via `y-monaco`.
-     - Switch language modes based on the selected language in the store.
-   - Implement `ActiveUsersPanel.tsx`:
-     - Read awareness/presence data and display active users using Material list components.
-     - Ensure that joining/leaving updates the list in real time.
+6. **Frontend: Code Execution**
+   - `useCodeRunner.ts`:
+     - Initialize JS Web Worker and Pyodide (lazy-load).
+     - Expose `runCode(code: string, language: Language)` API.
+     - Update Zustand output log with stdout/stderr/system messages.
+   - Wire "Run Code" button in AppBar or SessionLayout to `useCodeRunner`.
 
-5. **Code Execution Engine (JS/TS/Python)**
-   - Implement `useCodeRunner`:
-     - Manage initialization of:
-       - A Web Worker for JS/TS execution.
-       - Pyodide instance for Python.
-     - For JavaScript:
-       - Send code to the worker and capture stdout/stderr.
-     - For TypeScript:
-       - Transpile TS to JS in-browser, then send to the JS worker.
-     - For Python:
-       - Use Pyodide to run code and capture output.
-   - Implement `OutputPanel.tsx`:
-     - Display execution logs using a Material list or console-style panel.
-     - Support different styles for stdout, stderr, and system messages.
+7. **Integration Tests (Client–Server & Real-Time)**
+   - In `apps/server/tests/integration/collaboration.test.ts`:
+     - Start Express + WS server in test environment.
+     - Use Node WebSocket clients or a test tool to simulate two users joining same `sessionId`:
+       - Verify text updates propagate across both clients via Yjs/Y-websocket.
+       - Verify presence/awareness updates when clients connect/disconnect.
+   - For end-to-end tests (optional but recommended):
+     - Use Playwright/Cypress to:
+       - Open two browser instances to same `/session/:sessionId`.
+       - Type in one, verify appearance in the other.
+       - Run code and confirm output panel updates.
 
-6. **Session Layout & UX**
-   - Implement `SessionLayout.tsx` to arrange:
-     - Top: AppBar with session title, language selector, and "Run Code" button.
-     - Main content:
-       - Primary region: `CodeEditor`.
-       - Side/bottom regions: `OutputPanel` and `ActiveUsersPanel` as smaller sections.
-   - Ensure responsive resizing while keeping the editor as the dominant area.
-
-7. **Integration Tests (Client-Server Real-time)**
-   - Add integration tests focusing on client-server interactions and real-time collaboration:
-     - Use a test framework like Jest + supertest for server, and a browser automation tool (e.g., Playwright/Cypress) or Node WebSocket clients to simulate multiple participants.
-     - Example tests:
-       - Start the server and confirm `GET /health` returns 200.
-       - Simulate two clients connecting to the same `sessionId`:
-         - Client A modifies the document; assert Client B sees the update.
-         - Client A joins and leaves; assert presence updates in both clients.
-       - Trigger code execution from the frontend:
-         - Ensure that the UI correctly receives and displays output from JS/TS/Python executions.
-   - Ensure tests cover:
-     - Proper synchronization of text between clients.
-     - Correct handling of new clients joining an existing session (they see current code state).
-     - Robust handling of disconnects (session remains functional for other users).
+---
 
 # Verification Instructions
 
-- From the landing page:
-  - Verify that "Create New Session" opens a dialog, collects name and language, generates a sessionId, and routes to `/session/:sessionId` with the correct initial language.
-  - Verify that "Join Existing Session" accepts name and sessionId and routes to the correct existing session.
-- In the coding environment:
-  - Open the same `sessionId` in two browsers; ensure all edits in one are reflected in the other in real time.
-  - Confirm that the Active Users list updates as users join/leave.
-  - For each supported language (JavaScript, TypeScript, Python), run a simple program and confirm outputs appear in the Output Panel.
-- Run the integration test suite:
-  - Confirm that client-server interactions and real-time collaboration tests pass, ensuring synchronization between frontend and backend when multiple users interact in a shared coding session.
+- **Landing Page**
+  - "Create New Session" → prompts for name + language → navigates to `/session/:sessionId` with collaborative environment initialized.
+  - "Join Existing Session" → prompts for name + sessionId → navigates to existing session and loads current code.
+
+- **Real-Time Collaboration**
+  - Open same `sessionId` in two different browsers.
+  - Verify:
+    - Typing in one editor appears in the other in near real time.
+    - Active Users panel updates as each user joins/leaves.
+
+- **Code Execution**
+  - For each language (JS, Python):
+    - Run a simple snippet.
+    - Confirm correct stdout/stderr in Output Panel.
+
+- **Integration Tests**
+  - Run integration test suite.
+  - Confirm:
+    - Client–server interactions succeed.
+    - Real-time code collaboration sync is correct.
+    - Multiple users remain synchronized in a shared session.
 
