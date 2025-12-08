@@ -1,9 +1,10 @@
 import React, { useEffect, useRef } from "react";
-import { Box, Typography, Paper } from "@mui/material";
+import { Box, Typography, Paper, Button, Stack } from "@mui/material";
+import ClearIcon from "@mui/icons-material/Clear";
 import { useStore } from "../store";
 
 export const OutputPanel: React.FC = () => {
-    const { logs } = useStore();
+    const { logs, clearLogs } = useStore();
     const bottomRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -22,12 +23,28 @@ export const OutputPanel: React.FC = () => {
             }}
         >
             <Box sx={{ px: 2, py: 1, borderBottom: 1, borderColor: "divider" }}>
-                <Typography
-                    variant="caption"
-                    sx={{ color: "text.secondary", fontWeight: "bold" }}
+                <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
                 >
-                    TERMINAL / OUTPUT
-                </Typography>
+                    <Typography
+                        variant="caption"
+                        sx={{ color: "text.secondary", fontWeight: "bold" }}
+                    >
+                        TERMINAL / OUTPUT
+                    </Typography>
+                    <Button
+                        variant="contained"
+                        color="warning"
+                        size="small"
+                        startIcon={<ClearIcon />}
+                        onClick={clearLogs}
+                        disabled={logs.length === 0}
+                    >
+                        Clear
+                    </Button>
+                </Stack>
             </Box>
             <Box
                 sx={{
