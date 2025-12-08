@@ -1,12 +1,19 @@
-import React from 'react';
-import { IconButton, Menu, MenuItem, ListItemIcon, ListItemText, Tooltip } from '@mui/material';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
-import CheckIcon from '@mui/icons-material/Check';
-import { useStore } from '../store';
+import React from "react";
+import {
+    IconButton,
+    Menu,
+    MenuItem,
+    ListItemIcon,
+    ListItemText,
+    Tooltip,
+} from "@mui/material";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import SettingsBrightnessIcon from "@mui/icons-material/SettingsBrightness";
+import CheckIcon from "@mui/icons-material/Check";
+import { useStore } from "../store";
 
-type ThemeMode = 'light' | 'dark' | 'system';
+type ThemeMode = "light" | "dark" | "system";
 
 const ThemeToggle: React.FC = () => {
     const { themeMode, setThemeMode } = useStore();
@@ -28,9 +35,9 @@ const ThemeToggle: React.FC = () => {
 
     const getCurrentIcon = () => {
         switch (themeMode) {
-            case 'light':
+            case "light":
                 return <LightModeIcon />;
-            case 'dark':
+            case "dark":
                 return <DarkModeIcon />;
             default:
                 return <SettingsBrightnessIcon />;
@@ -39,20 +46,33 @@ const ThemeToggle: React.FC = () => {
 
     const getTooltipText = () => {
         switch (themeMode) {
-            case 'light':
-                return 'Light mode';
-            case 'dark':
-                return 'Dark mode';
+            case "light":
+                return "Light mode";
+            case "dark":
+                return "Dark mode";
             default:
-                return 'System theme';
+                return "System theme";
         }
     };
 
-    const options: { mode: ThemeMode; icon: React.ReactNode; label: string }[] = [
-        { mode: 'light', icon: <LightModeIcon fontSize="small" />, label: 'Light' },
-        { mode: 'dark', icon: <DarkModeIcon fontSize="small" />, label: 'Dark' },
-        { mode: 'system', icon: <SettingsBrightnessIcon fontSize="small" />, label: 'System' },
-    ];
+    const options: { mode: ThemeMode; icon: React.ReactNode; label: string }[] =
+        [
+            {
+                mode: "light",
+                icon: <LightModeIcon fontSize="small" />,
+                label: "Light",
+            },
+            {
+                mode: "dark",
+                icon: <DarkModeIcon fontSize="small" />,
+                label: "Dark",
+            },
+            {
+                mode: "system",
+                icon: <SettingsBrightnessIcon fontSize="small" />,
+                label: "System",
+            },
+        ];
 
     return (
         <>
@@ -61,17 +81,17 @@ const ThemeToggle: React.FC = () => {
                     onClick={handleClick}
                     size="small"
                     sx={{
-                        color: 'text.secondary',
-                        transition: 'all 0.2s ease-in-out',
-                        '&:hover': {
-                            color: 'primary.main',
-                            transform: 'rotate(15deg)',
+                        color: "text.secondary",
+                        transition: "all 0.2s ease-in-out",
+                        "&:hover": {
+                            color: "primary.main",
+                            transform: "rotate(15deg)",
                         },
                     }}
                     aria-label="Toggle theme"
-                    aria-controls={open ? 'theme-menu' : undefined}
+                    aria-controls={open ? "theme-menu" : undefined}
                     aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
+                    aria-expanded={open ? "true" : undefined}
                 >
                     {getCurrentIcon()}
                 </IconButton>
@@ -82,10 +102,10 @@ const ThemeToggle: React.FC = () => {
                 open={open}
                 onClose={handleClose}
                 MenuListProps={{
-                    'aria-labelledby': 'theme-button',
+                    "aria-labelledby": "theme-button",
                 }}
-                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                transformOrigin={{ horizontal: "right", vertical: "top" }}
+                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                 PaperProps={{
                     sx: {
                         mt: 1,
@@ -108,7 +128,11 @@ const ThemeToggle: React.FC = () => {
                         <ListItemIcon>{option.icon}</ListItemIcon>
                         <ListItemText>{option.label}</ListItemText>
                         {themeMode === option.mode && (
-                            <CheckIcon fontSize="small" color="primary" sx={{ ml: 1 }} />
+                            <CheckIcon
+                                fontSize="small"
+                                color="primary"
+                                sx={{ ml: 1 }}
+                            />
                         )}
                     </MenuItem>
                 ))}

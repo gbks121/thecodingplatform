@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -7,13 +7,13 @@ export default defineConfig({
     resolve: {
         alias: {
             // ensuring a single instance of yjs
-            yjs: 'yjs'
-        }
+            yjs: "yjs",
+        },
     },
     server: {
-        port: 3000
+        port: 3000,
     },
     optimizeDeps: {
-        include: ['yjs', 'y-websocket', 'y-monaco']
-    }
-})
+        include: ["yjs", "y-websocket", "y-monaco"],
+    },
+});

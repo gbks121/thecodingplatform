@@ -7,7 +7,9 @@
         "build": "tsc",
         "test": "vitest",
         "test:coverage": "vitest run --coverage",
-        "test:integration": "node scripts/test-sync.js"
+        "test:integration": "node scripts/test-sync.js",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix"
     },
     "dependencies": {
         "@thecodingplatform/shared": "*",

@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { Language, ExecutionLog, User } from '@thecodingplatform/shared';
+import { create } from "zustand";
+import { Language, ExecutionLog, User } from "@thecodingplatform/shared";
 
 interface AppState {
     user: User | null;
@@ -7,11 +7,11 @@ interface AppState {
     language: Language;
     logs: ExecutionLog[];
     activeUsers: User[];
-    themeMode: 'light' | 'dark' | 'system';
+    themeMode: "light" | "dark" | "system";
 
     setUser: (user: User) => void;
     setSessionId: (id: string) => void;
-    setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
+    setThemeMode: (mode: "light" | "dark" | "system") => void;
     setLanguage: (lang: Language) => void;
     addLog: (log: ExecutionLog) => void;
     clearLogs: () => void;
@@ -21,10 +21,10 @@ interface AppState {
 export const useStore = create<AppState>((set) => ({
     user: null,
     sessionId: null,
-    language: 'javascript', // default
+    language: "javascript", // default
     logs: [],
     activeUsers: [],
-    themeMode: 'system',
+    themeMode: "system",
 
     setUser: (user) => set({ user }),
     setSessionId: (sessionId) => set({ sessionId }),

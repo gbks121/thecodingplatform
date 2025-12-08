@@ -5,6 +5,8 @@
     "types": "src/index.ts",
     "scripts": {
         "test": "exit 0",
-        "test:coverage": "exit 0"
+        "test:coverage": "exit 0",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix"
     }
 }

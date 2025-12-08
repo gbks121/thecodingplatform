@@ -1,30 +1,42 @@
-import React, { useRef, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useRef, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
-    Box, AppBar, Toolbar, Typography, Button, IconButton,
-    Select, MenuItem, CircularProgress, Tooltip, Stack
-} from '@mui/material';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
-import ThemeToggle from '../components/ThemeToggle';
+    Box,
+    AppBar,
+    Toolbar,
+    Typography,
+    Button,
+    IconButton,
+    Select,
+    MenuItem,
+    CircularProgress,
+    Tooltip,
+    Stack,
+} from "@mui/material";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import ThemeToggle from "../components/ThemeToggle";
 
-import { useStore } from '../store';
-import { useYjs } from '../hooks/useYjs';
-import { useCodeRunner } from '../hooks/useCodeRunner';
-import { CodeEditor } from '../components/CodeEditor';
-import { OutputPanel } from '../components/OutputPanel';
-import { ActiveUsersPanel } from '../components/ActiveUsersPanel';
-import { ChatPanel } from '../components/ChatPanel';
-import { ConnectionIndicator } from '../components/ConnectionIndicator';
-import { Language } from '@thecodingplatform/shared';
+import { useStore } from "../store";
+import { useYjs } from "../hooks/useYjs";
+import { useCodeRunner } from "../hooks/useCodeRunner";
+import { CodeEditor } from "../components/CodeEditor";
+import { OutputPanel } from "../components/OutputPanel";
+import { ActiveUsersPanel } from "../components/ActiveUsersPanel";
+import { ChatPanel } from "../components/ChatPanel";
+import { ConnectionIndicator } from "../components/ConnectionIndicator";
+import { Language } from "@thecodingplatform/shared";
 
 const CodingSession: React.FC = () => {
     const { sessionId } = useParams<{ sessionId: string }>();
     const navigate = useNavigate();
     const { user, language, setSessionId, clearLogs } = useStore();
-    const { provider, yDoc, isSynced, connectionStatus } = useYjs(sessionId || null, user);
+    const { provider, yDoc, isSynced, connectionStatus } = useYjs(
+        sessionId || null,
+        user
+    );
     const { runCode, isRunning } = useCodeRunner();
 
     const editorRef = useRef<any>(null);
@@ -53,15 +65,15 @@ const CodingSession: React.FC = () => {
     // Listen for Shared State
     useEffect(() => {
         if (!yDoc || !isSynced) return;
-        const metaMap = yDoc.getMap('meta');
+        const metaMap = yDoc.getMap("meta");
 
         // Only set language if map is empty AND we are synced.
-        if (!metaMap.has('language') && language) {
-            metaMap.set('language', language);
+        if (!metaMap.has("language") && language) {
+            metaMap.set("language", language);
         }
 
         const observer = (event: any) => {
-            if (event.keysChanged.has('run-trigger')) {
+            if (event.keysChanged.has("run-trigger")) {
                 handleRun();
             }
         };
@@ -69,27 +81,27 @@ const CodingSession: React.FC = () => {
         return () => metaMap.unobserve(observer);
     }, [yDoc, isSynced, runCode]);
 
-
     const handleRun = async () => {
         if (!editorRef.current || !monacoRef.current) return;
         clearLogs();
         const code = editorRef.current.getValue();
         const currentLang = languageRef.current; // Use ref to get fresh value
 
-        if (currentLang === 'typescript') {
+        if (currentLang === "typescript") {
             try {
-                const worker = await monacoRef.current.languages.typescript.getTypeScriptWorker();
+                const worker =
+                    await monacoRef.current.languages.typescript.getTypeScriptWorker();
                 const model = editorRef.current.getModel();
                 const client = await worker(model.uri);
                 const result = await client.getEmitOutput(model.uri.toString());
                 const jsCode = result.outputFiles[0].text;
-                runCode(jsCode, 'javascript');
+                runCode(jsCode, "javascript");
             } catch (e) {
                 console.error("Transpilation failed", e);
-                runCode(code, 'javascript'); // Fallback or error
+                runCode(code, "javascript"); // Fallback or error
             }
         } else {
-            runCode(code, currentLang as 'javascript' | 'python');
+            runCode(code, currentLang as "javascript" | "python");
         }
     };
 
@@ -100,13 +112,13 @@ const CodingSession: React.FC = () => {
     const handleLanguageChange = (e: any) => {
         const newLang = e.target.value as Language;
         if (yDoc) {
-            yDoc.getMap('meta').set('language', newLang);
+            yDoc.getMap("meta").set("language", newLang);
         }
     };
 
     const broadcastRun = () => {
         if (yDoc) {
-            yDoc.getMap('meta').set('run-trigger', Date.now());
+            yDoc.getMap("meta").set("run-trigger", Date.now());
         }
     };
 
@@ -114,26 +126,44 @@ const CodingSession: React.FC = () => {
     if (!user || !sessionId) return null;
 
     return (
-        <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
             {/* Header */}
             <AppBar position="static" color="default" elevation={1}>
                 <Toolbar variant="dense">
-                    <IconButton edge="start" color="inherit" onClick={() => navigate('/')} sx={{ mr: 2 }}>
+                    <IconButton
+                        edge="start"
+                        color="inherit"
+                        onClick={() => navigate("/")}
+                        sx={{ mr: 2 }}
+                    >
                         <ArrowBackIcon />
                     </IconButton>
-                    <Stack direction="row" alignItems="center" spacing={1} sx={{ flexGrow: 1 }}>
-                        <AutoFixHighIcon sx={{ color: 'primary.main' }} />
+                    <Stack
+                        direction="row"
+                        alignItems="center"
+                        spacing={1}
+                        sx={{ flexGrow: 1 }}
+                    >
+                        <AutoFixHighIcon sx={{ color: "primary.main" }} />
                         <Typography variant="h6" fontWeight="bold" noWrap>
                             TheCodingPlatform
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" noWrap sx={{ ml: 2 }}>
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            noWrap
+                            sx={{ ml: 2 }}
+                        >
                             Session: {sessionId}
                         </Typography>
                     </Stack>
 
                     <Stack direction="row" spacing={2} alignItems="center">
                         <Tooltip title="Copy Session Link">
-                            <IconButton color="inherit" onClick={handleCopyLink}>
+                            <IconButton
+                                color="inherit"
+                                onClick={handleCopyLink}
+                            >
                                 <ContentCopyIcon />
                             </IconButton>
                         </Tooltip>
@@ -155,7 +185,16 @@ const CodingSession: React.FC = () => {
                         <Button
                             variant="contained"
                             color="success"
-                            startIcon={isRunning ? <CircularProgress size={20} color="inherit" /> : <PlayArrowIcon />}
+                            startIcon={
+                                isRunning ? (
+                                    <CircularProgress
+                                        size={20}
+                                        color="inherit"
+                                    />
+                                ) : (
+                                    <PlayArrowIcon />
+                                )
+                            }
                             onClick={broadcastRun}
                             disabled={isRunning}
                         >
@@ -166,32 +205,64 @@ const CodingSession: React.FC = () => {
             </AppBar>
 
             {/* Main Content */}
-            <Box sx={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+            <Box sx={{ flex: 1, display: "flex", overflow: "hidden" }}>
                 {/* Left: Editor + Output */}
-                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                    <Box sx={{ flex: 2, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                <Box
+                    sx={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        minWidth: 0,
+                    }}
+                >
+                    <Box
+                        sx={{
+                            flex: 2,
+                            display: "flex",
+                            flexDirection: "column",
+                            minHeight: 0,
+                        }}
+                    >
                         <CodeEditor
                             yDoc={yDoc}
                             provider={provider}
                             onEditorMount={handleEditorMount}
                         />
                     </Box>
-                    <Box sx={{
-                        flex: 1,
-                        minHeight: '200px',
-                        borderTop: (theme) => `4px solid ${theme.palette.divider}`,
-                        bgcolor: 'background.paper'
-                    }}>
+                    <Box
+                        sx={{
+                            flex: 1,
+                            minHeight: "200px",
+                            borderTop: (theme) =>
+                                `4px solid ${theme.palette.divider}`,
+                            bgcolor: "background.paper",
+                        }}
+                    >
                         <OutputPanel />
                     </Box>
                 </Box>
 
                 {/* Right: Active Users & Chat */}
-                <Box sx={{ width: 300, display: { xs: 'none', md: 'flex' }, flexDirection: 'column', borderLeft: 1, borderColor: 'divider' }}>
+                <Box
+                    sx={{
+                        width: 300,
+                        display: { xs: "none", md: "flex" },
+                        flexDirection: "column",
+                        borderLeft: 1,
+                        borderColor: "divider",
+                    }}
+                >
                     <Box sx={{ flexShrink: 0 }}>
                         <ActiveUsersPanel />
                     </Box>
-                    <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                    <Box
+                        sx={{
+                            flex: 1,
+                            minHeight: 0,
+                            display: "flex",
+                            flexDirection: "column",
+                        }}
+                    >
                         <ChatPanel yDoc={yDoc} />
                     </Box>
                 </Box>

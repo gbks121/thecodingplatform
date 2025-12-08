@@ -1,4 +1,4 @@
-export type Language = 'javascript' | 'typescript' | 'python';
+export type Language = "javascript" | "typescript" | "python";
 
 export interface User {
     id: string;
@@ -8,8 +8,9 @@ export interface User {
 }
 
 export interface ExecutionLog {
-    type: 'stdout' | 'stderr' | 'system';
-    content: string;
+    id: string;
+    type: "stdout" | "stderr" | "system";
+    message: string;
     timestamp: number;
 }
 

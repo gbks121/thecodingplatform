@@ -1,13 +1,13 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite';
+import { defineConfig } from "vite";
 
 export default defineConfig({
     test: {
         globals: true,
-        environment: 'node',
+        environment: "node",
         coverage: {
-            provider: 'v8',
-            reporter: ['text', 'json', 'html'],
+            provider: "v8",
+            reporter: ["text", "json", "html"],
         },
     },
 });

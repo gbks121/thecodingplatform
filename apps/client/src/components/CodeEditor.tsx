@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
-import Editor, { OnMount } from '@monaco-editor/react';
-import * as Y from 'yjs';
-import { WebsocketProvider } from 'y-websocket';
-import { MonacoBinding } from 'y-monaco';
-import { Box, CircularProgress, useTheme } from '@mui/material';
-import { useStore } from '../store';
+import React, { useEffect, useRef } from "react";
+import Editor, { OnMount } from "@monaco-editor/react";
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
+import { MonacoBinding } from "y-monaco";
+import { Box, CircularProgress, useTheme } from "@mui/material";
+import { useStore } from "../store";
 
 interface CodeEditorProps {
     yDoc: Y.Doc | null;
@@ -12,7 +12,11 @@ interface CodeEditorProps {
     onEditorMount?: (editor: any, monaco: any) => void;
 }
 
-export const CodeEditor: React.FC<CodeEditorProps> = ({ yDoc, provider, onEditorMount }) => {
+export const CodeEditor: React.FC<CodeEditorProps> = ({
+    yDoc,
+    provider,
+    onEditorMount,
+}) => {
     const theme = useTheme();
     const { language } = useStore();
     const [editor, setEditor] = React.useState<any>(null);
@@ -20,7 +24,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ yDoc, provider, onEditor
     const bindingRef = useRef<MonacoBinding | null>(null);
 
     // Determine Monaco theme based on MUI theme
-    const monacoTheme = theme.palette.mode === 'dark' ? 'vs-dark' : 'vs';
+    const monacoTheme = theme.palette.mode === "dark" ? "vs-dark" : "vs";
 
     const handleEditorDidMount: OnMount = (editorInstance, monaco) => {
         setEditor(editorInstance);
@@ -37,15 +41,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ yDoc, provider, onEditor
             bindingRef.current.destroy();
         }
 
-        const yText = yDoc.getText('monaco');
+        const yText = yDoc.getText("monaco");
         const model = editor.getModel();
 
         if (!model) {
-            console.error('Debug: No model found for editor');
+            console.error("Debug: No model found for editor");
             return;
         }
 
-        console.log('Debug: Creating new MonacoBinding');
+        console.log("Debug: Creating new MonacoBinding");
         try {
             // Create new binding
             bindingRef.current = new MonacoBinding(
@@ -59,19 +63,21 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ yDoc, provider, onEditor
             const disposable = editor.onDidChangeModelContent(() => {
                 // Only broadcast if THIS user is typing (has focus)
                 if (editor.hasTextFocus()) {
-                    provider.awareness.setLocalStateField('lastActivity', Date.now());
+                    provider.awareness.setLocalStateField(
+                        "lastActivity",
+                        Date.now()
+                    );
                 }
             });
 
-            console.log('Debug: Binding created successfully');
+            console.log("Debug: Binding created successfully");
             (bindingRef.current as any)._customDisposable = disposable;
-
         } catch (err) {
-            console.error('Debug: Failed to create binding', err);
+            console.error("Debug: Failed to create binding", err);
         }
 
         return () => {
-            console.log('Debug: Destroying binding');
+            console.log("Debug: Destroying binding");
             (bindingRef.current as any)?._customDisposable?.dispose();
             bindingRef.current?.destroy();
             bindingRef.current = null;
@@ -84,7 +90,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ yDoc, provider, onEditor
 
         const model = editor.getModel();
         if (model) {
-            console.log('Debug: Updating model language to', language);
+            console.log("Debug: Updating model language to", language);
             monacoRef.current.editor.setModelLanguage(model, language);
         }
     }, [language, editor]);

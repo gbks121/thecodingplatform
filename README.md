@@ -4,47 +4,52 @@ A real-time collaborative coding environment designed for technical interviews a
 
 ## Features
 
--   **Real-Time Collaboration**: Code synchronization powered by Yjs and WebSockets.
--   **Multi-Language Support**:
-    -   **JavaScript**: Secure execution in a Web Worker sandboxed environment.
-    -   **TypeScript**: In-browser transpilation to JavaScript using Monaco services.
-    -   **Python**: Client-side execution using Pyodide (WASM).
--   **Live Awareness**: See who is active in the session and when they are **typing**.
--   **Terminal Output**: Real-time `stdout` and `stderr` capturing.
--   **Stateless**: No database required; sessions are ephemeral and exist only while active.
--   **Modern UI**: Built with React, Vite, and Google Material Design (MUI).
+- **Real-Time Collaboration**: Code synchronization powered by Yjs and WebSockets.
+- **Multi-Language Support**:
+    - **JavaScript**: Secure execution in a Web Worker sandboxed environment.
+    - **TypeScript**: In-browser transpilation to JavaScript using Monaco services.
+    - **Python**: Client-side execution using Pyodide (WASM).
+- **Live Awareness**: See who is active in the session and when they are **typing**.
+- **Terminal Output**: Real-time `stdout` and `stderr` capturing.
+- **Stateless**: No database required; sessions are ephemeral and exist only while active.
+- **Modern UI**: Built with React, Vite, and Google Material Design (MUI).
 
 ## Tech Stack
 
 ### Frontend (`apps/client`)
--   **Framework**: React 18, Vite
--   **Language**: TypeScript
--   **Styling**: Material UI (MUI)
--   **Editor**: Monaco Editor (`@monaco-editor/react`)
--   **Collaboration**: Yjs, `y-websocket`, `y-monaco`
--   **State Management**: Zustand
--   **Testing**: Vitest, React Testing Library
--   **Runtime**: Web Workers, Pyodide
+
+- **Framework**: React 18, Vite
+- **Language**: TypeScript
+- **Styling**: Material UI (MUI)
+- **Editor**: Monaco Editor (`@monaco-editor/react`)
+- **Collaboration**: Yjs, `y-websocket`, `y-monaco`
+- **State Management**: Zustand
+- **Testing**: Vitest, React Testing Library
+- **Runtime**: Web Workers, Pyodide
 
 ### Backend (`apps/server`)
--   **Runtime**: Node.js
--   **Framework**: Express.js
--   **WebSockets**: `ws` library (handling Yjs sync)
--   **Language**: TypeScript
--   **Testing**: Vitest, Supertest
+
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **WebSockets**: `ws` library (handling Yjs sync)
+- **Language**: TypeScript
+- **Testing**: Vitest, Supertest
 
 ### Shared (`packages/shared`)
--   Shared TypeScript types and contracts.
+
+- Shared TypeScript types and contracts.
 
 ## Getting Started
 
 ### Prerequisites
--   Node.js (v18+ recommended)
--   npm (v9+ recommended)
+
+- Node.js (v18+ recommended)
+- npm (v9+ recommended)
 
 ### Installation
 
 1.  Clone the repository:
+
     ```bash
     git clone https://github.com/your-username/thecodingplatform.git
     cd thecodingplatform
@@ -64,8 +69,8 @@ Start both the client and server concurrently:
 npm run dev
 ```
 
--   **Frontend**: Open [http://localhost:3000](http://localhost:3000)
--   **Backend**: Running on [http://localhost:3001](http://localhost:3001)
+- **Frontend**: Open [http://localhost:3000](http://localhost:3000)
+- **Backend**: Running on [http://localhost:3001](http://localhost:3001)
 
 ### Testing
 
