@@ -60,11 +60,11 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ yDoc }) => {
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            bgcolor: '#1e1e1e', // Match sidebar dark theme
-            color: '#fff',
+            bgcolor: 'background.paper',
+            color: 'text.primary',
             minHeight: 0 // Allow flex shrink
         }}>
-            <Box sx={{ p: 1, borderBottom: '1px solid #333' }}>
+            <Box sx={{ p: 1, borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}>
                 <Typography variant="subtitle2" fontWeight="bold">Chat</Typography>
             </Box>
 
@@ -79,14 +79,14 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ yDoc }) => {
                                 maxWidth: '85%',
                             }}
                         >
-                            <Typography variant="caption" sx={{ color: '#aaa', ml: 0.5, fontSize: '0.7rem' }}>
+                            <Typography variant="caption" sx={{ color: 'text.secondary', ml: 0.5, fontSize: '0.7rem' }}>
                                 {isMe ? 'You' : msg.userName}
                             </Typography>
                             <Paper sx={{
                                 p: 1,
                                 px: 1.5,
-                                bgcolor: isMe ? '#D0BCFF' : '#333',
-                                color: isMe ? '#000' : '#fff',
+                                bgcolor: isMe ? 'primary.main' : (theme) => theme.palette.mode === 'dark' ? '#333' : '#e0e0e0',
+                                color: isMe ? 'primary.contrastText' : 'text.primary',
                                 borderRadius: 2
                             }}>
                                 <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
@@ -99,7 +99,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ yDoc }) => {
                 <div ref={bottomRef} />
             </Box>
 
-            <Divider sx={{ borderColor: '#333' }} />
+            <Divider />
 
             <Box sx={{ p: 1, display: 'flex', gap: 1 }}>
                 <TextField
@@ -111,12 +111,12 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ yDoc }) => {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyPress}
                     sx={{
-                        bgcolor: '#2d2d2d',
+                        bgcolor: (theme) => theme.palette.mode === 'dark' ? '#2d2d2d' : 'background.default',
                         '& .MuiOutlinedInput-root': {
-                            color: '#fff',
-                            '& fieldset': { borderColor: 'transparent' },
-                            '&:hover fieldset': { borderColor: 'transparent' },
-                            '&.Mui-focused fieldset': { borderColor: 'transparent' },
+                            color: 'text.primary',
+                            '& fieldset': { borderColor: 'divider' },
+                            '&:hover fieldset': { borderColor: 'primary.main' },
+                            '&.Mui-focused fieldset': { borderColor: 'primary.main' },
                         }
                     }}
                 />

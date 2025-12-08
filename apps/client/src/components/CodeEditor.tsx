@@ -3,7 +3,7 @@ import Editor, { OnMount } from '@monaco-editor/react';
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { MonacoBinding } from 'y-monaco';
-import { Box, CircularProgress } from '@mui/material';
+import { Box, CircularProgress, useTheme } from '@mui/material';
 import { useStore } from '../store';
 
 interface CodeEditorProps {
@@ -13,10 +13,14 @@ interface CodeEditorProps {
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({ yDoc, provider, onEditorMount }) => {
+    const theme = useTheme();
     const { language } = useStore();
     const [editor, setEditor] = React.useState<any>(null);
     const monacoRef = useRef<any>(null);
     const bindingRef = useRef<MonacoBinding | null>(null);
+
+    // Determine Monaco theme based on MUI theme
+    const monacoTheme = theme.palette.mode === 'dark' ? 'vs-dark' : 'vs';
 
     const handleEditorDidMount: OnMount = (editorInstance, monaco) => {
         setEditor(editorInstance);
@@ -85,11 +89,17 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({ yDoc, provider, onEditor
         }
     }, [language, editor]);
 
+    // Effect 3: Update Monaco theme when MUI theme changes
+    useEffect(() => {
+        if (!editor || !monacoRef.current) return;
+        monacoRef.current.editor.setTheme(monacoTheme);
+    }, [monacoTheme, editor]);
+
     return (
         <Box sx={{ flex: 1, minHeight: 0 }}>
             <Editor
                 height="100%"
-                theme="vs-dark"
+                theme={monacoTheme}
                 language={language}
                 options={{
                     minimap: { enabled: false },

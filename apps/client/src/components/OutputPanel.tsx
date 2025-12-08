@@ -17,12 +17,12 @@ export const OutputPanel: React.FC = () => {
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                bgcolor: '#1e1e1e',
-                borderColor: '#333'
+                bgcolor: 'background.paper',
+                borderColor: 'divider'
             }}
         >
-            <Box sx={{ px: 2, py: 1, borderBottom: 1, borderColor: '#333' }}>
-                <Typography variant="caption" sx={{ color: '#aaa', fontWeight: 'bold' }}>
+            <Box sx={{ px: 2, py: 1, borderBottom: 1, borderColor: 'divider' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>
                     TERMINAL / OUTPUT
                 </Typography>
             </Box>
@@ -32,13 +32,17 @@ export const OutputPanel: React.FC = () => {
                         <Box
                             component="span"
                             sx={{
-                                color: log.type === 'stderr' ? '#f44336' : log.type === 'system' ? '#2196f3' : '#e0e0e0',
+                                color: log.type === 'stderr'
+                                    ? '#f44336'
+                                    : log.type === 'system'
+                                        ? '#2196f3'
+                                        : 'text.secondary',
                                 mr: 1
                             }}
                         >
                             [{new Date(log.timestamp).toLocaleTimeString()}]
                         </Box>
-                        <Box component="span" sx={{ color: log.type === 'stderr' ? '#ffcdd2' : '#fff' }}>
+                        <Box component="span" sx={{ color: log.type === 'stderr' ? '#ffcdd2' : 'text.primary' }}>
                             {log.message}
                         </Box>
                     </Box>

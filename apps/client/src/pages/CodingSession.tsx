@@ -7,6 +7,8 @@ import {
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import ThemeToggle from '../components/ThemeToggle';
 
 import { useStore } from '../store';
 import { useYjs } from '../hooks/useYjs';
@@ -15,13 +17,14 @@ import { CodeEditor } from '../components/CodeEditor';
 import { OutputPanel } from '../components/OutputPanel';
 import { ActiveUsersPanel } from '../components/ActiveUsersPanel';
 import { ChatPanel } from '../components/ChatPanel';
+import { ConnectionIndicator } from '../components/ConnectionIndicator';
 import { Language } from '@thecodingplatform/shared';
 
 const CodingSession: React.FC = () => {
     const { sessionId } = useParams<{ sessionId: string }>();
     const navigate = useNavigate();
     const { user, language, setSessionId, clearLogs } = useStore();
-    const { provider, yDoc, isSynced } = useYjs(sessionId || null, user);
+    const { provider, yDoc, isSynced, connectionStatus } = useYjs(sessionId || null, user);
     const { runCode, isRunning } = useCodeRunner();
 
     const editorRef = useRef<any>(null);
@@ -113,14 +116,20 @@ const CodingSession: React.FC = () => {
     return (
         <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
             {/* Header */}
-            <AppBar position="static" color="default" elevation={1} sx={{ bgcolor: '#2d2d2d' }}>
+            <AppBar position="static" color="default" elevation={1}>
                 <Toolbar variant="dense">
                     <IconButton edge="start" color="inherit" onClick={() => navigate('/')} sx={{ mr: 2 }}>
                         <ArrowBackIcon />
                     </IconButton>
-                    <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, color: '#fff' }}>
-                        Session: {sessionId}
-                    </Typography>
+                    <Stack direction="row" alignItems="center" spacing={1} sx={{ flexGrow: 1 }}>
+                        <AutoFixHighIcon sx={{ color: 'primary.main' }} />
+                        <Typography variant="h6" fontWeight="bold" noWrap>
+                            TheCodingPlatform
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" noWrap sx={{ ml: 2 }}>
+                            Session: {sessionId}
+                        </Typography>
+                    </Stack>
 
                     <Stack direction="row" spacing={2} alignItems="center">
                         <Tooltip title="Copy Session Link">
@@ -129,11 +138,14 @@ const CodingSession: React.FC = () => {
                             </IconButton>
                         </Tooltip>
 
+                        <ConnectionIndicator status={connectionStatus} />
+
+                        <ThemeToggle />
+
                         <Select
                             value={language}
                             size="small"
                             onChange={handleLanguageChange}
-                            sx={{ color: '#fff', borderColor: '#fff' }}
                         >
                             <MenuItem value="javascript">JavaScript</MenuItem>
                             <MenuItem value="typescript">TypeScript</MenuItem>
@@ -167,8 +179,8 @@ const CodingSession: React.FC = () => {
                     <Box sx={{
                         flex: 1,
                         minHeight: '200px',
-                        borderTop: '4px solid #121212',
-                        bgcolor: '#1e1e1e'
+                        borderTop: (theme) => `4px solid ${theme.palette.divider}`,
+                        bgcolor: 'background.paper'
                     }}>
                         <OutputPanel />
                     </Box>

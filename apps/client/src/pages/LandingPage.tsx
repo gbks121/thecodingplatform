@@ -17,6 +17,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 import SpeedIcon from '@mui/icons-material/Speed';
 import BoltIcon from '@mui/icons-material/Bolt';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import ThemeToggle from '../components/ThemeToggle';
 
 const LandingPage: React.FC = () => {
     const navigate = useNavigate();
@@ -70,8 +71,8 @@ const LandingPage: React.FC = () => {
             minHeight: '100vh',
             display: 'flex',
             flexDirection: 'column',
-            bgcolor: '#0f0f11',
-            color: '#fff',
+            bgcolor: 'background.default',
+            color: 'text.primary',
             overflowX: 'hidden',
             position: 'relative'
         }}>
@@ -82,7 +83,7 @@ const LandingPage: React.FC = () => {
                 left: '-10%',
                 width: '50%',
                 height: '50%',
-                background: 'radial-gradient(circle, rgba(144, 202, 249, 0.1) 0%, rgba(0,0,0,0) 70%)',
+                background: (theme) => `radial-gradient(circle, ${theme.palette.mode === 'dark' ? 'rgba(144, 202, 249, 0.1)' : 'rgba(103, 80, 164, 0.05)'} 0%, rgba(0,0,0,0) 70%)`,
                 filter: 'blur(60px)',
                 zIndex: 0
             }} />
@@ -92,7 +93,7 @@ const LandingPage: React.FC = () => {
                 right: '-5%',
                 width: '40%',
                 height: '40%',
-                background: 'radial-gradient(circle, rgba(208, 188, 255, 0.1) 0%, rgba(0,0,0,0) 70%)',
+                background: (theme) => `radial-gradient(circle, ${theme.palette.mode === 'dark' ? 'rgba(208, 188, 255, 0.1)' : 'rgba(208, 188, 255, 0.05)'} 0%, rgba(0,0,0,0) 70%)`,
                 filter: 'blur(60px)',
                 zIndex: 0
             }} />
@@ -101,10 +102,10 @@ const LandingPage: React.FC = () => {
             <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, py: 3 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Stack direction="row" alignItems="center" spacing={1}>
-                        <AutoFixHighIcon sx={{ color: '#D0BCFF' }} />
+                        <AutoFixHighIcon sx={{ color: 'primary.main' }} />
                         <Typography variant="h6" fontWeight="bold">TheCodingPlatform</Typography>
                     </Stack>
-                    <Button color="inherit" onClick={() => setOpenJoin(true)}>Join Existing</Button>
+                    <ThemeToggle />
                 </Stack>
             </Container>
 
@@ -122,7 +123,9 @@ const LandingPage: React.FC = () => {
             }}>
                 <Typography variant="h1" fontWeight="800" sx={{
                     fontSize: { xs: '3rem', md: '5rem' },
-                    background: 'linear-gradient(45deg, #fff 30%, #D0BCFF 90%)',
+                    background: (theme) => theme.palette.mode === 'dark'
+                        ? 'linear-gradient(45deg, #fff 30%, #D0BCFF 90%)'
+                        : 'linear-gradient(45deg, #1D1B20 30%, #6750A4 90%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                     mb: 2,
@@ -143,8 +146,10 @@ const LandingPage: React.FC = () => {
                         onClick={() => setOpenCreate(true)}
                         sx={{
                             px: 5, py: 2, fontSize: '1.2rem', borderRadius: '50px',
-                            background: 'linear-gradient(45deg, #6750A4 30%, #D0BCFF 90%)',
-                            boxShadow: '0 4px 20px rgba(103, 80, 164, 0.5)'
+                            background: (theme) => theme.palette.mode === 'dark'
+                                ? 'linear-gradient(45deg, #6750A4 30%, #D0BCFF 90%)'
+                                : 'linear-gradient(45deg, #6750A4 30%, #8576B5 90%)',
+                            boxShadow: (theme) => `0 4px 20px ${theme.palette.mode === 'dark' ? 'rgba(103, 80, 164, 0.5)' : 'rgba(103, 80, 164, 0.3)'}`
                         }}
                     >
                         Start Coding Now
@@ -154,7 +159,7 @@ const LandingPage: React.FC = () => {
                         size="large"
                         startIcon={<GroupIcon />}
                         onClick={() => setOpenJoin(true)}
-                        sx={{ px: 5, py: 2, fontSize: '1.2rem', borderRadius: '50px', borderColor: '#555', color: '#fff' }}
+                        sx={{ px: 5, py: 2, fontSize: '1.2rem', borderRadius: '50px', borderColor: 'primary.main', color: 'text.primary' }}
                     >
                         Join Session
                     </Button>
@@ -162,7 +167,7 @@ const LandingPage: React.FC = () => {
             </Container>
 
             {/* Features Section */}
-            <Box sx={{ bgcolor: '#161618', py: 10, position: 'relative', zIndex: 1 }}>
+            <Box sx={{ bgcolor: 'background.paper', py: 10, position: 'relative', zIndex: 1 }}>
                 <Container maxWidth="lg">
                     <Grid container spacing={4}>
                         <FeatureCard
@@ -185,7 +190,7 @@ const LandingPage: React.FC = () => {
             </Box>
 
             {/* Footer */}
-            <Box sx={{ py: 4, textAlign: 'center', color: '#666', fontSize: '0.9rem', position: 'relative', zIndex: 1 }}>
+            <Box sx={{ py: 4, textAlign: 'center', color: 'text.secondary', fontSize: '0.9rem', position: 'relative', zIndex: 1 }}>
                 TheCodingPlatform &copy; 2025. Built for speed and simplicity.
             </Box>
 
@@ -196,9 +201,9 @@ const LandingPage: React.FC = () => {
                 onClose={() => setOpenCreate(false)}
                 fullWidth
                 maxWidth="xs"
-                PaperProps={{ sx: { borderRadius: 3, bgcolor: '#1e1e1e', backgroundImage: 'none' } }}
+                PaperProps={{ sx: { borderRadius: 3, bgcolor: 'background.paper', backgroundImage: 'none' } }}
             >
-                <DialogTitle sx={{ color: '#fff' }}>Create New Session</DialogTitle>
+                <DialogTitle sx={{ color: 'text.primary' }}>Create New Session</DialogTitle>
                 <DialogContent>
                     <TextField
                         autoFocus
@@ -208,16 +213,15 @@ const LandingPage: React.FC = () => {
                         variant="filled"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        sx={{ mb: 2, input: { color: '#fff' }, label: { color: '#aaa' } }}
+                        sx={{ mb: 2 }}
                     />
                     <FormControl fullWidth margin="dense">
-                        <InputLabel sx={{ color: '#aaa' }}>Preferred Language</InputLabel>
+                        <InputLabel>Preferred Language</InputLabel>
                         <Select
                             value={selectedLanguage}
                             label="Preferred Language"
                             variant="filled"
                             onChange={(e) => setSelectedLanguage(e.target.value as Language)}
-                            sx={{ color: '#fff' }}
                         >
                             <MenuItem value="javascript">JavaScript</MenuItem>
                             <MenuItem value="typescript">TypeScript</MenuItem>
@@ -226,7 +230,7 @@ const LandingPage: React.FC = () => {
                     </FormControl>
                 </DialogContent>
                 <DialogActions sx={{ p: 2 }}>
-                    <Button onClick={() => setOpenCreate(false)} sx={{ color: '#aaa' }}>Cancel</Button>
+                    <Button onClick={() => setOpenCreate(false)} color="inherit">Cancel</Button>
                     <Button onClick={handleCreate} variant="contained" sx={{ borderRadius: 20, px: 3 }}>Create</Button>
                 </DialogActions>
             </Dialog>
@@ -237,9 +241,9 @@ const LandingPage: React.FC = () => {
                 onClose={() => setOpenJoin(false)}
                 fullWidth
                 maxWidth="xs"
-                PaperProps={{ sx: { borderRadius: 3, bgcolor: '#1e1e1e', backgroundImage: 'none' } }}
+                PaperProps={{ sx: { borderRadius: 3, bgcolor: 'background.paper', backgroundImage: 'none' } }}
             >
-                <DialogTitle sx={{ color: '#fff' }}>Join Existing Session</DialogTitle>
+                <DialogTitle sx={{ color: 'text.primary' }}>Join Existing Session</DialogTitle>
                 <DialogContent>
                     <TextField
                         autoFocus
@@ -249,7 +253,6 @@ const LandingPage: React.FC = () => {
                         variant="filled"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        sx={{ input: { color: '#fff' }, label: { color: '#aaa' } }}
                     />
                     <TextField
                         margin="dense"
@@ -258,11 +261,11 @@ const LandingPage: React.FC = () => {
                         variant="filled"
                         value={targetSessionId}
                         onChange={(e) => setTargetSessionId(e.target.value)}
-                        sx={{ mt: 2, input: { color: '#fff' }, label: { color: '#aaa' } }}
+                        sx={{ mt: 2 }}
                     />
                 </DialogContent>
                 <DialogActions sx={{ p: 2 }}>
-                    <Button onClick={() => setOpenJoin(false)} sx={{ color: '#aaa' }}>Cancel</Button>
+                    <Button onClick={() => setOpenJoin(false)} color="inherit">Cancel</Button>
                     <Button onClick={handleJoin} variant="contained" sx={{ borderRadius: 20, px: 3 }}>Join</Button>
                 </DialogActions>
             </Dialog>
@@ -272,10 +275,10 @@ const LandingPage: React.FC = () => {
 
 const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; desc: string }> = ({ icon, title, desc }) => (
     <Grid item xs={12} md={4}>
-        <Card elevation={0} sx={{ height: '100%', bgcolor: 'transparent', border: '1px solid #333', borderRadius: 4 }}>
+        <Card elevation={0} sx={{ height: '100%', bgcolor: 'transparent', border: (theme) => `1px solid ${theme.palette.divider}`, borderRadius: 4 }}>
             <CardContent sx={{ p: 4, textAlign: 'left' }}>
                 <Box sx={{ mb: 2 }}>{icon}</Box>
-                <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: '#fff' }}>
+                <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: 'text.primary' }}>
                     {title}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>

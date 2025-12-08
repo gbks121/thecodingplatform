@@ -4,18 +4,15 @@ import { WebsocketProvider } from 'y-websocket';
 import { useStore } from '../store';
 import { User } from '@thecodingplatform/shared';
 
-import { useEffect, useState } from 'react';
-import * as Y from 'yjs';
-import { WebsocketProvider } from 'y-websocket';
-import { useStore } from '../store';
-import { User } from '@thecodingplatform/shared';
-
 const WS_URL = 'ws://localhost:3001';
+
+type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
 
 export const useYjs = (sessionId: string | null, user: User | null) => {
     const [provider, setProvider] = useState<WebsocketProvider | null>(null);
     const [yDoc, setYDoc] = useState<Y.Doc | null>(null);
     const [isSynced, setIsSynced] = useState(false);
+    const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
     const { setActiveUsers } = useStore();
 
     useEffect(() => {
@@ -26,6 +23,13 @@ export const useYjs = (sessionId: string | null, user: User | null) => {
 
         wsProvider.on('status', (event: any) => {
             console.log('Websocket status:', event.status);
+            if (event.status === 'connected') {
+                setConnectionStatus('connected');
+            } else if (event.status === 'disconnected') {
+                setConnectionStatus('disconnected');
+            } else {
+                setConnectionStatus('connecting');
+            }
         });
 
         wsProvider.on('sync', (isSynced: boolean) => {
@@ -77,5 +81,5 @@ export const useYjs = (sessionId: string | null, user: User | null) => {
         };
     }, [sessionId, user, setActiveUsers]);
 
-    return { provider, yDoc, isSynced };
+    return { provider, yDoc, isSynced, connectionStatus };
 };
