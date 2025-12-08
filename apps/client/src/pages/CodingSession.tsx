@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
     Box,
@@ -12,12 +12,14 @@ import {
     CircularProgress,
     Tooltip,
     Stack,
+    SelectChangeEvent,
 } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import ThemeToggle from "../components/ThemeToggle";
+import type * as Monaco from "monaco-editor";
 
 import { useStore } from "../store";
 import { useYjs } from "../hooks/useYjs";
@@ -28,6 +30,7 @@ import { ActiveUsersPanel } from "../components/ActiveUsersPanel";
 import { ChatPanel } from "../components/ChatPanel";
 import { ConnectionIndicator } from "../components/ConnectionIndicator";
 import { Language } from "@thecodingplatform/shared";
+import * as Y from "yjs";
 
 const CodingSession: React.FC = () => {
     const { sessionId } = useParams<{ sessionId: string }>();
@@ -39,8 +42,8 @@ const CodingSession: React.FC = () => {
     );
     const { runCode, isRunning } = useCodeRunner();
 
-    const editorRef = useRef<any>(null);
-    const monacoRef = useRef<any>(null);
+    const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
+    const monacoRef = useRef<typeof Monaco | null>(null);
     const languageRef = useRef(language);
 
     // Keep languageRef updated
@@ -57,31 +60,15 @@ const CodingSession: React.FC = () => {
         }
     }, [user, sessionId, navigate, setSessionId]);
 
-    const handleEditorMount = (editor: any, monaco: any) => {
+    const handleEditorMount = (
+        editor: Monaco.editor.IStandaloneCodeEditor,
+        monaco: typeof Monaco
+    ) => {
         editorRef.current = editor;
         monacoRef.current = monaco;
     };
 
-    // Listen for Shared State
-    useEffect(() => {
-        if (!yDoc || !isSynced) return;
-        const metaMap = yDoc.getMap("meta");
-
-        // Only set language if map is empty AND we are synced.
-        if (!metaMap.has("language") && language) {
-            metaMap.set("language", language);
-        }
-
-        const observer = (event: any) => {
-            if (event.keysChanged.has("run-trigger")) {
-                handleRun();
-            }
-        };
-        metaMap.observe(observer);
-        return () => metaMap.unobserve(observer);
-    }, [yDoc, isSynced, runCode]);
-
-    const handleRun = async () => {
+    const handleRun = useCallback(async () => {
         if (!editorRef.current || !monacoRef.current) return;
         clearLogs();
         const code = editorRef.current.getValue();
@@ -92,6 +79,7 @@ const CodingSession: React.FC = () => {
                 const worker =
                     await monacoRef.current.languages.typescript.getTypeScriptWorker();
                 const model = editorRef.current.getModel();
+                if (!model) return;
                 const client = await worker(model.uri);
                 const result = await client.getEmitOutput(model.uri.toString());
                 const jsCode = result.outputFiles[0].text;
@@ -103,18 +91,40 @@ const CodingSession: React.FC = () => {
         } else {
             runCode(code, currentLang as "javascript" | "python");
         }
-    };
+    }, [clearLogs, runCode]);
+
+    // Listen for Shared State
+    useEffect(() => {
+        if (!yDoc || !isSynced) return;
+        const metaMap = yDoc.getMap("meta");
+
+        // Only set language if map is empty AND we are synced.
+        if (!metaMap.has("language") && language) {
+            metaMap.set("language", language);
+        }
+
+        const observer = (event: Y.YMapEvent<unknown>) => {
+            if (event.keysChanged.has("run-trigger")) {
+                handleRun();
+            }
+        };
+        metaMap.observe(observer);
+        return () => metaMap.unobserve(observer);
+    }, [yDoc, isSynced, handleRun, language]);
 
     const handleCopyLink = () => {
         navigator.clipboard.writeText(window.location.href);
     };
 
-    const handleLanguageChange = (e: any) => {
-        const newLang = e.target.value as Language;
-        if (yDoc) {
-            yDoc.getMap("meta").set("language", newLang);
-        }
-    };
+    const handleLanguageChange = useCallback(
+        (e: SelectChangeEvent<Language>) => {
+            const newLang = e.target.value as Language;
+            if (yDoc) {
+                yDoc.getMap("meta").set("language", newLang);
+            }
+        },
+        [yDoc]
+    );
 
     const broadcastRun = () => {
         if (yDoc) {

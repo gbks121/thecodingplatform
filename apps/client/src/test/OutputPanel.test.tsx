@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { OutputPanel } from "../components/OutputPanel";
 import { useStore } from "../store";
 
@@ -7,9 +7,12 @@ vi.mock("../store", () => ({
     useStore: vi.fn(),
 }));
 
+// Type assertion for mocked useStore
+const mockedUseStore = useStore as unknown as ReturnType<typeof vi.fn>;
+
 describe("OutputPanel", () => {
     it("renders logs correctly", () => {
-        (useStore as any).mockReturnValue({
+        mockedUseStore.mockReturnValue({
             logs: [
                 {
                     id: "1",
@@ -34,7 +37,7 @@ describe("OutputPanel", () => {
     });
 
     it("renders system messages differently", () => {
-        (useStore as any).mockReturnValue({
+        mockedUseStore.mockReturnValue({
             logs: [
                 {
                     id: "3",
@@ -46,7 +49,7 @@ describe("OutputPanel", () => {
             clearLogs: vi.fn(),
         });
 
-        const { container } = render(<OutputPanel />);
+        render(<OutputPanel />);
         expect(screen.getByText("System Ready")).toBeInTheDocument();
         // Check for specific styling class or color logic if implemented
         // Here we just verify presence

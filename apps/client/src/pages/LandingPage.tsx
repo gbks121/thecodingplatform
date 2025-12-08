@@ -18,7 +18,6 @@ import {
     Card,
     CardContent,
     useTheme,
-    useMediaQuery,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../store";
@@ -37,8 +36,8 @@ import ThemeToggle from "../components/ThemeToggle";
 const LandingPage: React.FC = () => {
     const navigate = useNavigate();
     const { setUser, setSessionId, setLanguage } = useStore();
-    const theme = useTheme();
-    // const _isMobile = useMediaQuery(theme.breakpoints.down("md"));
+    const _theme = useTheme();
+    // const _isMobile = useMediaQuery(_theme.breakpoints.down("md"));
 
     const [openCreate, setOpenCreate] = useState(false);
     const [openJoin, setOpenJoin] = useState(false);
@@ -54,8 +53,11 @@ const LandingPage: React.FC = () => {
         const params = new URLSearchParams(window.location.search);
         const joinId = params.get("join");
         if (joinId) {
-            setTargetSessionId(joinId);
-            setOpenJoin(true);
+            // Use setTimeout to avoid calling setState synchronously in effect
+            setTimeout(() => {
+                setTargetSessionId(joinId);
+                setOpenJoin(true);
+            }, 0);
         }
     }, []);
 

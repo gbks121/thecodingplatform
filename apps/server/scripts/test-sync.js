@@ -1,6 +1,6 @@
-const WebSocket = require("ws");
-const Y = require("yjs");
-const { WebsocketProvider } = require("y-websocket");
+import WebSocket from "ws";
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
 
 // Polyfill for y-websocket on Node
 global.WebSocket = WebSocket;

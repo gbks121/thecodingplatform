@@ -41,13 +41,13 @@ describe("ChatPanel", () => {
         const chatArray = yDoc.getArray("chat");
         expect(chatArray.length).toBe(1);
 
-        const msg = chatArray.get(0) as any;
+        const msg = chatArray.get(0) as { text: string; userName: string };
         expect(msg.text).toBe("Hello World");
         expect(msg.userName).toBe("Test User");
     });
 
     it("displays incoming messages", async () => {
-        const { rerender } = render(<ChatPanel yDoc={yDoc} />);
+        render(<ChatPanel yDoc={yDoc} />);
 
         // Simulate incoming message
         const chatArray = yDoc.getArray("chat");

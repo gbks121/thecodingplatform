@@ -9,26 +9,28 @@ self.onmessage = async (e: MessageEvent) => {
         } else if (language === "javascript") {
             runJavascript(code, id);
         }
-    } catch (err: any) {
-        self.postMessage({ type: "stderr", message: err.toString(), id });
+    } catch (err: unknown) {
+        self.postMessage({ type: "stderr", message: String(err), id });
     }
 };
 
 // --- JavaScript Execution ---
 function runJavascript(code: string, id: string) {
     // Simple console.log capture
-    const originalLog = console.log;
-    const originalError = console.error;
+    const _originalLog = console.log;
+    const _originalError = console.error;
 
-    const logs: string[] = [];
+    const _logs: string[] = [];
     const capture =
         (type: "stdout" | "stderr") =>
-        (...args: any[]) => {
+        (...args: unknown[]) => {
             self.postMessage({
                 type,
                 message: args
                     .map((a) =>
-                        typeof a === "object" ? JSON.stringify(a) : String(a)
+                        typeof a === "object" && a !== null
+                            ? JSON.stringify(a)
+                            : String(a)
                     )
                     .join(" "),
                 id,
@@ -45,22 +47,28 @@ function runJavascript(code: string, id: string) {
             warn: capture("stdout"),
             info: capture("stdout"),
         });
-    } catch (e: any) {
-        self.postMessage({ type: "stderr", message: e.toString(), id });
+    } catch (e: unknown) {
+        self.postMessage({ type: "stderr", message: String(e), id });
     }
 }
 
 // --- Python Execution ---
-let pyodide: any = null;
+let pyodide: {
+    setStdout: (options: { batched: (msg: string) => void }) => void;
+    setStderr: (options: { batched: (msg: string) => void }) => void;
+    runPythonAsync: (code: string) => Promise<void>;
+} | null = null;
 
 async function runPython(code: string, id: string) {
     if (!pyodide) {
         self.postMessage({ type: "system", message: "Loading Pyodide...", id });
         try {
-            // @ts-ignore
-            const { loadPyodide } =
+            // Dynamic import of Pyodide from CDN
+
+            const pyodideModule: { loadPyodide: () => Promise<unknown> } =
                 await import("https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.mjs");
-            pyodide = await loadPyodide();
+
+            pyodide = (await pyodideModule.loadPyodide()) as typeof pyodide;
             self.postMessage({
                 type: "system",
                 message: "Pyodide loaded.",
@@ -72,6 +80,8 @@ async function runPython(code: string, id: string) {
     }
 
     // Redirect stdout/stderr
+    if (!pyodide) return;
+
     pyodide.setStdout({
         batched: (msg: string) =>
             self.postMessage({ type: "stdout", message: msg, id }),

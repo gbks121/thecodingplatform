@@ -6,9 +6,9 @@ A real-time collaborative coding environment designed for technical interviews a
 
 - **Real-Time Collaboration**: Code synchronization powered by Yjs and WebSockets
 - **Multi-Language Support**:
-  - **JavaScript**: Secure execution in a Web Worker sandboxed environment
-  - **TypeScript**: In-browser transpilation to JavaScript using Monaco services
-  - **Python**: Client-side execution using Pyodide (WASM)
+    - **JavaScript**: Secure execution in a Web Worker sandboxed environment
+    - **TypeScript**: In-browser transpilation to JavaScript using Monaco services
+    - **Python**: Client-side execution using Pyodide (WASM)
 - **Live Awareness**: See who is active in the session and when they are typing
 - **Terminal Output**: Real-time stdout and stderr capturing
 - **Stateless**: No database required; sessions are ephemeral and exist only while active
@@ -49,15 +49,18 @@ A real-time collaborative coding environment designed for technical interviews a
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/your-username/thecodingplatform.git
 cd thecodingplatform
 ```
 
 2. Install dependencies (from the root):
+
 ```bash
 npm install
 ```
+
 This will install dependencies for all workspaces (`apps/client`, `apps/server`, `packages/shared`).
 
 ### Running Locally
@@ -121,17 +124,21 @@ thecodingplatform/
 ## Architecture Highlights
 
 ### Real-Time Collaboration
+
 The platform uses **Yjs** (a conflict-free replicated data type) for document synchronization and **WebSockets** for real-time communication. When users join a session, they connect to a shared Yjs document that automatically handles:
+
 - Operational Transformation (OT) for simultaneous edits
 - Connection recovery and offline support
 - Awareness states for active users and typing indicators
 
 ### Security & Sandboxing
+
 - **JavaScript/TypeScript**: Executed in isolated Web Workers
 - **Python**: Runs in Pyodide (WebAssembly) sandbox
 - No server-side code execution, everything happens client-side
 
 ### State Management
+
 - **Zustand** for global application state
 - **Local State** for component-specific data
 - **Yjs Documents** for collaborative document state

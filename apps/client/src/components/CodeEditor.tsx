@@ -5,11 +5,15 @@ import { WebsocketProvider } from "y-websocket";
 import { MonacoBinding } from "y-monaco";
 import { Box, CircularProgress, useTheme } from "@mui/material";
 import { useStore } from "../store";
+import type * as Monaco from "monaco-editor";
 
 interface CodeEditorProps {
     yDoc: Y.Doc | null;
     provider: WebsocketProvider | null;
-    onEditorMount?: (editor: any, monaco: any) => void;
+    onEditorMount?: (
+        editor: Monaco.editor.IStandaloneCodeEditor,
+        monaco: typeof Monaco
+    ) => void;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -19,8 +23,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 }) => {
     const theme = useTheme();
     const { language } = useStore();
-    const [editor, setEditor] = React.useState<any>(null);
-    const monacoRef = useRef<any>(null);
+    const [editor, setEditor] =
+        React.useState<Monaco.editor.IStandaloneCodeEditor | null>(null);
+    const monacoRef = useRef<typeof Monaco | null>(null);
     const bindingRef = useRef<MonacoBinding | null>(null);
 
     // Determine Monaco theme based on MUI theme
@@ -71,14 +76,22 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             });
 
             console.log("Debug: Binding created successfully");
-            (bindingRef.current as any)._customDisposable = disposable;
+            (
+                bindingRef.current as MonacoBinding & {
+                    _customDisposable?: Monaco.IDisposable;
+                }
+            )._customDisposable = disposable;
         } catch (err) {
             console.error("Debug: Failed to create binding", err);
         }
 
         return () => {
             console.log("Debug: Destroying binding");
-            (bindingRef.current as any)?._customDisposable?.dispose();
+            (
+                bindingRef.current as MonacoBinding & {
+                    _customDisposable?: Monaco.IDisposable;
+                }
+            )?._customDisposable?.dispose();
             bindingRef.current?.destroy();
             bindingRef.current = null;
         };

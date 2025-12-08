@@ -1,9 +1,14 @@
 import { IncomingMessage } from "http";
+import { WebSocket } from "ws";
 
-// @ts-ignore - y-websocket types for server are strict or missing often
-const { setupWSConnection } = require("y-websocket/bin/utils");
+// @ts-expect-error - y-websocket types for server are strict or missing often
+import { setupWSConnection } from "y-websocket/bin/utils";
 
-export function handleUpgrade(req: IncomingMessage, socket: any, _head: any) {
+export function handleUpgrade(
+    req: IncomingMessage,
+    socket: WebSocket,
+    _head: Buffer
+) {
     // You might parse session ID from req.url here if needed,
     // but setupWSConnection usually handles the docName from path.
     // default y-websocket behavior: path is the doc name.

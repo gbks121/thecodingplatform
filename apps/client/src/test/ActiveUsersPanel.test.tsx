@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { ActiveUsersPanel } from "../components/ActiveUsersPanel";
 import { useStore } from "../store";
 
@@ -8,9 +8,12 @@ vi.mock("../store", () => ({
     useStore: vi.fn(),
 }));
 
+// Type assertion for mocked useStore
+const mockedUseStore = useStore as unknown as ReturnType<typeof vi.fn>;
+
 describe("ActiveUsersPanel", () => {
     it("renders the list of active users", () => {
-        (useStore as any).mockReturnValue({
+        mockedUseStore.mockReturnValue({
             activeUsers: [
                 { id: "1", name: "Alice", color: "#ff0000" },
                 { id: "2", name: "Bob", color: "#00ff00" },
@@ -25,7 +28,7 @@ describe("ActiveUsersPanel", () => {
     });
 
     it("shows empty state", () => {
-        (useStore as any).mockReturnValue({
+        mockedUseStore.mockReturnValue({
             activeUsers: [],
         });
 
