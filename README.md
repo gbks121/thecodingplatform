@@ -4,15 +4,15 @@ A real-time collaborative coding environment designed for technical interviews a
 
 ## Features
 
-- **Real-Time Collaboration**: Code synchronization powered by Yjs and WebSockets.
+- **Real-Time Collaboration**: Code synchronization powered by Yjs and WebSockets
 - **Multi-Language Support**:
-    - **JavaScript**: Secure execution in a Web Worker sandboxed environment.
-    - **TypeScript**: In-browser transpilation to JavaScript using Monaco services.
-    - **Python**: Client-side execution using Pyodide (WASM).
-- **Live Awareness**: See who is active in the session and when they are **typing**.
-- **Terminal Output**: Real-time `stdout` and `stderr` capturing.
-- **Stateless**: No database required; sessions are ephemeral and exist only while active.
-- **Modern UI**: Built with React, Vite, and Google Material Design (MUI).
+  - **JavaScript**: Secure execution in a Web Worker sandboxed environment
+  - **TypeScript**: In-browser transpilation to JavaScript using Monaco services
+  - **Python**: Client-side execution using Pyodide (WASM)
+- **Live Awareness**: See who is active in the session and when they are typing
+- **Terminal Output**: Real-time stdout and stderr capturing
+- **Stateless**: No database required; sessions are ephemeral and exist only while active
+- **Modern UI**: Built with React, Vite, and Google Material Design (MUI)
 
 ## Tech Stack
 
@@ -37,9 +37,9 @@ A real-time collaborative coding environment designed for technical interviews a
 
 ### Shared (`packages/shared`)
 
-- Shared TypeScript types and contracts.
+- Shared TypeScript types and contracts
 
-## Getting Started
+## Quick Start
 
 ### Prerequisites
 
@@ -48,18 +48,17 @@ A real-time collaborative coding environment designed for technical interviews a
 
 ### Installation
 
-1.  Clone the repository:
+1. Clone the repository:
+```bash
+git clone https://github.com/your-username/thecodingplatform.git
+cd thecodingplatform
+```
 
-    ```bash
-    git clone https://github.com/your-username/thecodingplatform.git
-    cd thecodingplatform
-    ```
-
-2.  Install dependencies (from the root):
-    ```bash
-    npm install
-    ```
-    This will install dependencies for all workspaces (`apps/client`, `apps/server`, `packages/shared`).
+2. Install dependencies (from the root):
+```bash
+npm install
+```
+This will install dependencies for all workspaces (`apps/client`, `apps/server`, `packages/shared`).
 
 ### Running Locally
 
@@ -72,18 +71,20 @@ npm run dev
 - **Frontend**: Open [http://localhost:3000](http://localhost:3000)
 - **Backend**: Running on [http://localhost:3001](http://localhost:3001)
 
-### Testing
-
-Run the full test suite (Unit + Integration):
+### Code Quality & Testing
 
 ```bash
-npm run test
-```
+# Code quality checks
+npm run lint        # Check for linting issues
+npm run lint:fix    # Auto-fix formatting issues
+npm run format      # Format with Prettier
 
-Generate Code Coverage reports:
+# Testing
+npm test            # Run all tests
+npm run test:coverage # Generate coverage reports
 
-```bash
-npm run test:coverage
+# Building
+npm run build       # Build all workspaces
 ```
 
 To verify the real-time WebSocket synchronization logic specifically:
@@ -102,8 +103,38 @@ thecodingplatform/
 ├── packages/
 │   └── shared/       # Shared TypeScript types
 ├── package.json      # Root configuration & workspaces
-└── tsconfig.json     # Base TypeScript configuration
+└── README.md         # This file
 ```
+
+## Available Scripts
+
+- `npm run dev` - Start development servers (client:3000, server:3001)
+- `npm run dev:client` - Start only the client development server
+- `npm run dev:server` - Start only the server development server
+- `npm run build` - Build all workspaces for production
+- `npm run test` - Run the complete test suite
+- `npm run test:coverage` - Generate code coverage reports
+- `npm run lint` - Run ESLint across all workspaces
+- `npm run lint:fix` - Auto-fix ESLint issues
+- `npm run format` - Format code with Prettier
+
+## Architecture Highlights
+
+### Real-Time Collaboration
+The platform uses **Yjs** (a conflict-free replicated data type) for document synchronization and **WebSockets** for real-time communication. When users join a session, they connect to a shared Yjs document that automatically handles:
+- Operational Transformation (OT) for simultaneous edits
+- Connection recovery and offline support
+- Awareness states for active users and typing indicators
+
+### Security & Sandboxing
+- **JavaScript/TypeScript**: Executed in isolated Web Workers
+- **Python**: Runs in Pyodide (WebAssembly) sandbox
+- No server-side code execution, everything happens client-side
+
+### State Management
+- **Zustand** for global application state
+- **Local State** for component-specific data
+- **Yjs Documents** for collaborative document state
 
 ## License
 
