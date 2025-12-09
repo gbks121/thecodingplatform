@@ -1,0 +1,300 @@
+openapi: 3.1.0
+info:
+  title: The Coding Platform API
+  description: |
+    API specification for The Coding Platform - a real-time collaborative coding interview and practice environment.
+    This API defines the contract between the frontend and backend for session management, real-time collaboration,
+    and code execution in an ephemeral, stateless environment.
+  version: 1.0.0
+  contact:
+    name: The Coding Platform Team
+    email: support@thecodingplatform.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3001
+    description: Local development server
+  - url: https://api.thecodingplatform.com
+    description: Production server
+
+tags:
+  - name: Health
+    description: Server health and status endpoints
+  - name: Sessions
+    description: Session management for collaborative coding
+  - name: WebSocket
+    description: Real-time collaboration via WebSocket
+  - name: CodeExecution
+    description: Client-side code execution (documented for reference)
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Check server health status
+      description: Returns the current health status and uptime of the server
+      operationId: getHealth
+      security: []
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '400':
+          description: Invalid request
+        '503':
+          description: Server is unhealthy or unavailable
+
+  /session/{sessionId}:
+    get:
+      tags:
+        - Sessions
+      summary: Get session information
+      description: |
+        Retrieve information about a specific coding session.
+        Note: This is a conceptual endpoint as the current implementation uses WebSocket for real-time collaboration.
+      operationId: getSession
+      security: []
+      parameters:
+        - name: sessionId
+          in: path
+          description: Unique identifier for the coding session
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Session information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionInfo'
+        '400':
+          description: Invalid session ID
+        '404':
+          description: Session not found
+
+  /ws/{sessionId}:
+    get:
+      tags:
+        - WebSocket
+      summary: WebSocket connection for real-time collaboration
+      description: |
+        Establishes a WebSocket connection for real-time collaborative editing using Yjs.
+        This connection handles document synchronization, awareness (presence), and shared state.
+      operationId: websocketConnection
+      security: []
+      parameters:
+        - name: sessionId
+          in: path
+          description: Unique identifier for the coding session
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '101':
+          description: WebSocket connection established
+        '200':
+          description: Connection successful
+        '400':
+          description: Invalid session ID or connection parameters
+        '401':
+          description: Unauthorized (future implementation)
+      callbacks:
+        onMessage:
+          '{$connectionId}/message':
+            post:
+              summary: Handle WebSocket message
+              security: []
+              requestBody:
+                description: WebSocket message payload
+                content:
+                  application/json:
+                    schema:
+                      oneOf:
+                        - $ref: '#/components/schemas/YjsSyncMessage'
+                        - $ref: '#/components/schemas/YjsAwarenessMessage'
+                        - $ref: '#/components/schemas/SessionMetaUpdate'
+              responses:
+                '200':
+                  description: Message processed successfully
+                '400':
+                  description: Invalid message format
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded, error]
+          example: "ok"
+        uptime:
+          type: number
+          description: Server uptime in seconds
+          example: 1234.56
+        timestamp:
+          type: string
+          format: date-time
+          description: Current server time
+      required:
+        - status
+        - uptime
+
+    SessionInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique session identifier
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        createdAt:
+          type: string
+          format: date-time
+          description: When the session was created
+        language:
+          $ref: '#/components/schemas/Language'
+        activeUsers:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+          description: List of currently active users in the session
+        lastActivity:
+          type: string
+          format: date-time
+          description: Last activity timestamp in the session
+      required:
+        - id
+        - createdAt
+        - language
+        - activeUsers
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique user identifier
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          description: User's display name
+          example: "John Doe"
+        color:
+          type: string
+          description: User's color for visual identification
+          example: "#FF5733"
+        lastActivity:
+          type: number
+          description: Timestamp of last user activity
+          example: 1678901234567
+      required:
+        - id
+        - name
+
+    Language:
+      type: string
+      enum: [javascript, typescript, python]
+      description: Programming language for the session
+      example: "javascript"
+
+    YjsSyncMessage:
+      type: object
+      description: Yjs document synchronization message
+      properties:
+        type:
+          type: string
+          enum: [sync, queryAwareness]
+          example: "sync"
+        docName:
+          type: string
+          description: Yjs document name (session ID)
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        data:
+          type: object
+          description: Yjs binary data (base64 encoded)
+          properties:
+            content:
+              type: string
+              format: byte
+              description: Base64 encoded Yjs update data
+
+    YjsAwarenessMessage:
+      type: object
+      description: Yjs awareness (presence) update message
+      properties:
+        type:
+          type: string
+          enum: [awareness]
+          example: "awareness"
+        clientId:
+          type: number
+          description: Client identifier
+          example: 12345
+        states:
+          type: object
+          description: Awareness states for all clients
+          additionalProperties:
+            type: object
+            properties:
+              user:
+                $ref: '#/components/schemas/User'
+              lastActivity:
+                type: number
+                description: Last activity timestamp
+                example: 1678901234567
+
+    SessionMetaUpdate:
+      type: object
+      description: Session metadata update (e.g., language change)
+      properties:
+        type:
+          type: string
+          enum: [meta]
+          example: "meta"
+        key:
+          type: string
+          description: Metadata key being updated
+          example: "language"
+        value:
+          type: string
+          description: New value for the metadata
+          example: "typescript"
+        timestamp:
+          type: number
+          description: When the update occurred
+          example: 1678901234567
+
+  securitySchemes:
+    # Future implementation - currently no authentication
+    apiKey:
+      type: apiKey
+      name: X-API-Key
+      in: header
+      description: API key for authenticated requests (future implementation)
+
+externalDocs:
+  description: The Coding Platform Documentation
+  url: https://docs.thecodingplatform.com
+
+x-tagGroups:
+  - name: Core API
+    tags:
+      - Health
+      - Sessions
+  - name: Real-time Features
+    tags:
+      - WebSocket
+      - CodeExecution
