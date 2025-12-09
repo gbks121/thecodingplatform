@@ -20,6 +20,10 @@ COPY apps ./apps
 RUN npm ci
 
 
+# Remove any stray TypeScript incremental build files left in the context
+# to ensure `tsc` performs a fresh build in CI/docker.
+RUN find . -name "*.tsbuildinfo" -delete || true
+
 # Build all packages in the correct order using the root script.
 # This runs `build:shared`, `build:server`, then `build:client`.
 RUN npm run build
