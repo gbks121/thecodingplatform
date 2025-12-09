@@ -5,7 +5,14 @@
         "moduleResolution": "bundler",
         "outDir": "./dist",
         "rootDir": "./src",
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "allowImportingTsExtensions": false
     },
-    "include": ["src", "src/test/types.d.ts"]
+    "include": ["src", "src/test/types.d.ts"],
+    "references": [
+        {
+            "path": "../../packages/shared"
+        }
+    ]
 }
