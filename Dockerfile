@@ -14,18 +14,13 @@ COPY packages ./packages
 COPY apps ./apps
 
 # Install all dependencies
+# Ensure npm supports the `workspace:` protocol (npm v7+).
+# Some base Node images may include older npm; pin to a modern npm here.
+RUN npm install -g npm@9 && npm --version
 RUN npm ci
-
-# Build packages in dependency order
-RUN npm run build:shared
-
-# Link the shared package explicitly to make it available to other workspaces
-RUN cd packages/shared && npm link
-RUN cd apps/client && npm link @thecodingplatform/shared
-
-# Build server and client
-RUN npm run build:server
-RUN npm run build:client
+# Build all packages in the correct order using the root script.
+# This runs `build:shared`, `build:server`, then `build:client`.
+RUN npm run build
 
 # Stage 2: Production image
 FROM node:lts-alpine AS final
