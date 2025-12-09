@@ -74,6 +74,20 @@ npm run dev
 - **Frontend**: Open [http://localhost:3000](http://localhost:3000)
 - **Backend**: Running on [http://localhost:3001](http://localhost:3001)
 
+### Running with Docker
+
+To run the application using Docker:
+
+```bash
+# Build and start the services
+docker-compose up --build
+
+# The application will be available at:
+# - Frontend: http://localhost:8080
+# - Backend API: http://localhost:3001
+# - Health check: http://localhost:3001/health
+```
+
 ### Code Quality & Testing
 
 ```bash

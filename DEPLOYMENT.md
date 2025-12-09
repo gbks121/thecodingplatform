@@ -1,216 +1,91 @@
 # Deployment Guide for The Coding Platform
 
-This guide covers the containerization and deployment setup for The Coding Platform using Docker, GitHub Actions, and Render.
+## Overview
+This guide explains how to deploy The Coding Platform to production using Render, with CI/CD via GitHub Actions.
 
-## 🐳 Docker Setup
+## Architecture
 
-### Local Development with Docker
+### Local Development (Docker Compose)
+- Frontend: Available at `http://localhost:8080`
+- Backend API: Available at `http://localhost:3001`
+- Both ports exposed for development convenience
 
-1. **Build and run the container:**
-   ```bash
-   docker-compose up --build
-   ```
+### Production (Render)
+- Single entry point: `https://your-service.onrender.com`
+- Nginx reverse proxy handles all requests internally
+- Backend service (port 3001) is NOT directly exposed to the outside world
+- Nginx proxies `/api` and `/health` requests to the backend internally
 
-2. **Access the application:**
-   - Frontend: http://localhost
-   - Backend API: http://localhost/api
-   - Health Check: http://localhost/health
+## Deployment to Render
 
-3. **Stop the container:**
-   ```bash
-   docker-compose down
-   ```
+### Prerequisites
+- A Render account
+- GitHub repository with the project code
 
-### Manual Docker Build
+### Steps
 
-```bash
-# Build the image
-docker build -t thecodingplatform .
+1. **Prepare Render Configuration**:
+   - The `render.yaml` file configures the deployment
+   - Service runs as a Docker web service
+   - Region set to Frankfurt (EU) for better latency
+   - Free tier plan selected
 
-# Run the container
-docker run -p 80:80 thecodingplatform
+2. **Connect GitHub Repository**:
+   - Go to Render dashboard
+   - Create new Web Service
+   - Connect to your GitHub repository
+   - Render will automatically use the `render.yaml` configuration
 
-# Run with custom environment variables
-docker run -p 80:80 \
-  -e NODE_ENV=production \
-  -e PORT=3001 \
-  thecodingplatform
-```
+3. **Environment Variables**:
+   - `NODE_ENV`: production
+   - `PORT`: 3001 (for the backend service inside the container)
 
-## 🚀 GitHub Actions CI/CD
+4. **Health Check**:
+   - Render monitors `/health` endpoint
+   - Nginx proxies this to the backend service
 
-The GitHub Actions workflow (`.github/workflows/ci-cd.yml`) automatically:
+## CI/CD Pipeline
 
-1. **Test Phase:**
-   - Runs linting and tests
-   - Generates coverage reports
-   - Uploads coverage to Codecov
+### GitHub Actions Workflow
+- Builds and tests on every push to main branch
+- Creates Docker image and pushes to GitHub Container Registry
+- Triggers Render deployment via webhook
 
-2. **Build Phase:**
-   - Builds multi-platform Docker images (AMD64 & ARM64)
-   - Pushes to GitHub Container Registry (ghcr.io)
-   - Caches layers for faster builds
+### Secrets Required
+- `RENDER_API_KEY`: Your Render API key
+- `RENDER_SERVICE_ID`: Your Render service ID
 
-3. **Deploy Phase:**
-   - Deploys to Render automatically
-   - Sends deployment notifications
+## Security Considerations
 
-4. **Security Phase:**
-   - Scans for vulnerabilities with Trivy
-   - Uploads security reports
+### Port Exposure
+- In production, only the main service port is exposed to the internet
+- Backend service (port 3001) is accessible only internally within the container
+- Nginx acts as a reverse proxy, forwarding requests as needed
+- This provides an additional security layer
 
-### Required GitHub Secrets
+### Network Isolation
+- Backend service cannot be directly accessed from outside
+- All traffic goes through nginx, which can implement additional security measures
 
-Add these secrets to your GitHub repository:
+## Scaling
+- Free tier supports 1 instance with 512MB RAM
+- Service will sleep after 15 minutes of inactivity
+- First request will wake up the service (cold start)
 
-- `RENDER_API_KEY` - Your Render API key
-- `RENDER_SERVICE_ID` - Your Render service ID
-- `SLACK_WEBHOOK` (optional) - For deployment notifications
+## Monitoring
+- Health check endpoint: `/health`
+- Logs available in Render dashboard
+- Error tracking through application logs
 
-## 🌐 Render Deployment
-
-### Setup Steps
-
-1. **Create Render Account:**
-   - Sign up at https://render.com
-   - Connect your GitHub account
-
-2. **Create Web Service:**
-   - Use the `render.yaml` blueprint file
-   - Select the EU (Frankfurt) region
-   - Choose the free plan
-
-3. **Configure Environment Variables:**
-   - `NODE_ENV=production`
-   - `PORT=3001`
-
-4. **Set Health Check:**
-   - Path: `/health`
-   - Interval: 30 seconds
-
-### Manual Deployment (Alternative)
-
-If not using the blueprint, manually create a web service with:
-- **Runtime:** Docker
-- **Dockerfile Path:** `./Dockerfile`
-- **Docker Context:** `.`
-- **Port:** 80
-- **Health Check:** `/health`
-
-## 🔧 Container Architecture
-
-The container uses a multi-stage build process:
-
-```
-┌─────────────────────────────────────┐
-│        Alpine Linux Container       │
-│                                     │
-│  ┌─────────────┐    ┌─────────────┐ │
-│  │   Nginx     │    │  Node.js    │ │
-│  │  (port 80)  │    │  (port 3001)│ │
-│  │  Frontend   │    │   Backend   │ │
-│  │  Static     │    │  WebSocket  │ │
-│  │  Files      │    │   Server    │ │
-│  └─────────────┘    └─────────────┘ │
-│                                     │
-└─────────────────────────────────────┘
-```
-
-### Key Features:
-- **Alpine Linux:** Minimal footprint (~50MB base)
-- **Multi-stage build:** Optimized for production
-- **Non-root user:** Security best practices
-- **Health checks:** Automatic container health monitoring
-- **Signal handling:** Proper shutdown handling with dumb-init
-- **Caching:** Layer caching for faster builds
-
-## 📊 Monitoring & Logging
-
-### Container Logs
-```bash
-# View logs
-docker logs <container-id>
-
-# Follow logs
-docker logs -f <container-id>
-```
-
-### Health Monitoring
-- Container health checks every 30 seconds
-- Render dashboard monitoring
-- GitHub Actions deployment status
-
-## 🔒 Security
-
-### Container Security
-- Non-root user execution
-- Minimal Alpine Linux base
-- Vulnerability scanning with Trivy
-- No unnecessary packages
-
-### Network Security
-- CORS enabled for cross-origin requests
-- WebSocket connections handled securely
-- Health check endpoint exposed
-
-## 🔄 Updates & Rollbacks
-
-### Updating the Application
-1. Push changes to `main` branch
-2. GitHub Actions automatically builds and deploys
-3. Render performs zero-downtime deployment
-
-### Rollback Process
-1. Revert changes in Git
-2. Push revert commit
-3. Automatic redeployment of previous version
-
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
+1. **Service not starting**: Check logs in Render dashboard
+2. **Health check failing**: Verify backend service is responding
+3. **Build failures**: Check GitHub Actions workflow logs
+4. **Cold start delays**: Consider upgrading to paid plan for always-on service
 
-1. **Container won't start:**
-   ```bash
-   docker logs <container-id>
-   ```
-
-2. **Build failures:**
-   - Check `.dockerignore` file
-   - Verify all dependencies are included
-   - Check build logs in GitHub Actions
-
-3. **Deployment failures:**
-   - Check Render dashboard logs
-   - Verify environment variables
-   - Check health check endpoint
-
-4. **WebSocket connection issues:**
-   - Ensure proper proxy configuration
-   - Check CORS settings
-   - Verify port mappings
-
-### Debug Mode
-```bash
-# Run with debug logging
-docker run -p 80:80 \
-  -e NODE_ENV=development \
-  -e DEBUG=* \
-  thecodingplatform
-```
-
-## 📞 Support
-
-For issues related to:
-- **Docker:** Check container logs and build output
-- **GitHub Actions:** Review workflow runs in Actions tab
-- **Render:** Check service logs in Render dashboard
-- **Application:** Review application logs and error messages
-
-## 🎯 Next Steps
-
-1. Set up GitHub secrets for deployment
-2. Test the container locally
-3. Push to main branch to trigger deployment
-4. Monitor deployment in Render dashboard
-5. Configure custom domain (optional)
-6. Set up monitoring alerts (optional)
+### Debugging
+- Check container logs in Render dashboard
+- Verify environment variables are set correctly
+- Test locally with `docker-compose` before deploying

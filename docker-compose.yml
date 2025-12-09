@@ -1,12 +1,11 @@
-version: '3.8'
-
 services:
   thecodingplatform:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - "8080:80"
+      - "3001:3001"
     environment:
       - NODE_ENV=production
       - PORT=3001
