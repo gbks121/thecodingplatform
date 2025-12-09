@@ -1,11 +1,21 @@
-import React, { useEffect, useRef } from "react";
-import Editor, { OnMount } from "@monaco-editor/react";
+import React, { useEffect, useRef, lazy, Suspense } from "react";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 import { MonacoBinding } from "y-monaco";
 import { Box, CircularProgress, useTheme } from "@mui/material";
 import { useStore } from "../store";
 import type * as Monaco from "monaco-editor";
+
+// Lazy load the Monaco Editor
+const Editor = lazy(() =>
+    import("@monaco-editor/react").then((module) => ({
+        default: module.Editor,
+    }))
+);
+type OnMount = (
+    editor: Monaco.editor.IStandaloneCodeEditor,
+    monaco: typeof Monaco
+) => void;
 
 interface CodeEditorProps {
     yDoc: Y.Doc | null;
@@ -116,18 +126,19 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
     return (
         <Box sx={{ flex: 1, minHeight: 0 }}>
-            <Editor
-                height="100%"
-                theme={monacoTheme}
-                language={language}
-                options={{
-                    minimap: { enabled: false },
-                    fontSize: 14,
-                    automaticLayout: true,
-                }}
-                onMount={handleEditorDidMount}
-                loading={<CircularProgress />}
-            />
+            <Suspense fallback={<CircularProgress />}>
+                <Editor
+                    height="100%"
+                    theme={monacoTheme}
+                    language={language}
+                    options={{
+                        minimap: { enabled: false },
+                        fontSize: 14,
+                        automaticLayout: true,
+                    }}
+                    onMount={handleEditorDidMount}
+                />
+            </Suspense>
         </Box>
     );
 };

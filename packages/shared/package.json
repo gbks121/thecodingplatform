@@ -4,9 +4,13 @@
     "main": "src/index.ts",
     "types": "src/index.ts",
     "scripts": {
+        "build": "tsc",
         "test": "exit 0",
         "test:coverage": "exit 0",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix"
+    },
+    "devDependencies": {
+        "typescript": "^5.3.3"
     }
 }

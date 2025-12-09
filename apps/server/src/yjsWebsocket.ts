@@ -1,7 +1,7 @@
 import { IncomingMessage } from "http";
 import { WebSocket } from "ws";
 
-// @ts-expect-error - y-websocket types for server are strict or missing often
+// @ts-ignore - y-websocket types for server are strict or missing often
 import { setupWSConnection } from "y-websocket/bin/utils";
 
 export function handleUpgrade(

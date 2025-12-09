@@ -10,16 +10,17 @@ import prettierConfig from "eslint-config-prettier";
 export default [
     {
         ignores: [
-            "dist/**",
-            "node_modules/**",
-            "coverage/**",
-            "*.config.ts",
-            "*.config.js",
+            "**/dist/**",
+            "**/node_modules/**",
+            "**/coverage/**",
+            "**/*.config.ts",
+            "**/*.config.js",
+            "**/build/**",
         ],
     },
     js.configs.recommended,
     {
-        files: ["**/*.{ts,tsx,js,jsx}"],
+        files: ["apps/**/src/**/*.{ts,tsx,js,jsx}", "packages/**/src/**/*.{ts,tsx,js,jsx}"],
         languageOptions: {
             parser: tseslintParser,
             parserOptions: {
@@ -89,6 +90,16 @@ export default [
                 },
             ],
             "@typescript-eslint/no-explicit-any": "warn",
+            "@typescript-eslint/ban-ts-comment": [
+                "error",
+                {
+                    "ts-ignore": "allow-with-description",
+                    "ts-expect-error": "allow-with-description",
+                    "ts-nocheck": "allow-with-description",
+                    "ts-check": "allow-with-description",
+                    "minimumDescriptionLength": 10
+                }
+            ],
             "react/prop-types": "off",
             "react/jsx-uses-react": "off",
             "react/react-in-jsx-scope": "off",
@@ -97,6 +108,23 @@ export default [
             react: {
                 version: "detect",
             },
+        },
+    },
+    // Configuration for Node.js scripts
+    {
+        files: ["apps/server/scripts/**/*.js"],
+        languageOptions: {
+            globals: {
+                console: "readonly",
+                process: "readonly",
+                setTimeout: "readonly",
+                global: "readonly",
+                Buffer: "readonly",
+                WebSocket: "readonly",
+            },
+        },
+        rules: {
+            "no-undef": "off",
         },
     },
 ];

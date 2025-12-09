@@ -17,7 +17,6 @@ import {
     Grid,
     Card,
     CardContent,
-    useTheme,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../store";
@@ -36,7 +35,7 @@ import ThemeToggle from "../components/ThemeToggle";
 const LandingPage: React.FC = () => {
     const navigate = useNavigate();
     const { setUser, setSessionId, setLanguage } = useStore();
-    const _theme = useTheme();
+    // const _theme = useTheme();
     // const _isMobile = useMediaQuery(_theme.breakpoints.down("md"));
 
     const [openCreate, setOpenCreate] = useState(false);

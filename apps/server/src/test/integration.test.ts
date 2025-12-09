@@ -3,8 +3,6 @@ import http from "http";
 import app from "../app";
 import { handleUpgrade } from "../yjsWebsocket";
 import { setupWSConnection } from "y-websocket/bin/utils";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { WebSocket } from "ws";
 
 // Mock the y-websocket module with a factory function
 vi.mock("y-websocket/bin/utils", () => {

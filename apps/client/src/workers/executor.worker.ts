@@ -17,10 +17,6 @@ self.onmessage = async (e: MessageEvent) => {
 // --- JavaScript Execution ---
 function runJavascript(code: string, id: string) {
     // Simple console.log capture
-    const _originalLog = console.log;
-    const _originalError = console.error;
-
-    const _logs: string[] = [];
     const capture =
         (type: "stdout" | "stderr") =>
         (...args: unknown[]) => {
@@ -64,11 +60,11 @@ async function runPython(code: string, id: string) {
         self.postMessage({ type: "system", message: "Loading Pyodide...", id });
         try {
             // Dynamic import of Pyodide from CDN
-
-            const pyodideModule: { loadPyodide: () => Promise<unknown> } =
+            // @ts-ignore - Dynamic import from CDN
+            const pyodideModule =
                 await import("https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.mjs");
 
-            pyodide = (await pyodideModule.loadPyodide()) as typeof pyodide;
+            pyodide = await pyodideModule.loadPyodide();
             self.postMessage({
                 type: "system",
                 message: "Pyodide loaded.",

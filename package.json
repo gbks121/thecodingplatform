@@ -11,6 +11,7 @@
         "dev:client": "npm run dev --workspace apps/client",
         "dev:server": "npm run dev --workspace apps/server",
         "test": "npm run test --workspaces",
+        "build": "npm run build --workspaces",
         "test:coverage": "npm run test:coverage --workspaces",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
@@ -28,6 +29,7 @@
         "eslint-plugin-react-hooks": "^7.0.1",
         "eslint-plugin-react-refresh": "^0.4.24",
         "prettier": "^3.7.4",
+        "tsx": "^4.21.0",
         "typescript": "^5.3.3"
     }
 }
