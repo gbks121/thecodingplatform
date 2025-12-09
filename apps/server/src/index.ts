@@ -1,7 +1,7 @@
 import http from "http";
 import { WebSocketServer } from "ws";
-import app from "./app";
-import { handleUpgrade } from "./yjsWebsocket";
+import app from "./app.js";
+import { handleUpgrade } from "./yjsWebsocket.js";
 
 const PORT = process.env.PORT || 3001;
 
