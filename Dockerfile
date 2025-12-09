@@ -18,6 +18,12 @@ RUN npm ci
 
 # Build packages in dependency order
 RUN npm run build:shared
+
+# Link the shared package explicitly to make it available to other workspaces
+RUN cd packages/shared && npm link
+RUN cd apps/client && npm link @thecodingplatform/shared
+
+# Build server and client
 RUN npm run build:server
 RUN npm run build:client
 
