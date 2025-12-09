@@ -16,11 +16,9 @@ COPY apps ./apps
 # Install all dependencies
 # Ensure npm supports the `workspace:` protocol (npm v7+).
 # Some base Node images may include older npm; pin to a modern npm here.
-RUN npm install -g npm@9 && npm --version
+# RUN npm install -g npm@9 && npm --version
 RUN npm ci
 
-##DEBUG - REMOVE LATER
-RUN npm --version && node --version && ls -la node_modules && ls -la packages/shared && cat package.json
 
 # Build all packages in the correct order using the root script.
 # This runs `build:shared`, `build:server`, then `build:client`.
