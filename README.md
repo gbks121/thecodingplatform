@@ -110,6 +110,32 @@ To verify the real-time WebSocket synchronization logic specifically:
 npm run test:integration --workspace=apps/server
 ```
 
+## Runtime & Networking (Nginx)
+
+- Frontend is served by nginx from `/app/frontend` on port `80` in production.
+- nginx proxies backend traffic internally to the Node server on port `3001`:
+    - `/api` → `http://localhost:3001`
+    - `/health` → `http://localhost:3001`
+    - `/ws` → proxied as a WebSocket upgrade to `http://localhost:3001` (used by Yjs).
+- The client uses a same-origin WebSocket path (`/ws`) that is translated to `ws://` or `wss://` depending on the page protocol so it works both locally and when deployed over HTTPS.
+- Health checks should target the public `/health` endpoint (nginx will forward to the backend). Example: `curl http://<host>/health`.
+- Platform note: ensure your host/load-balancer (Render, etc.) supports WebSocket proxying and points to the container's port `80` (nginx handles backend proxying).
+
+## Deploying to Render
+
+- **Service Type:** Use a Web Service using a Docker image (select the repository and Dockerfile build).
+- **Dockerfile path:** `./Dockerfile` (root of repo). The image exposes port `80` where nginx serves the frontend and proxies the backend.
+- **Health Check:** Point Render's health check to the public `/health` endpoint (HTTP GET). Example: `/health` with a 10s timeout and a few retries.
+- **Environment / Ports:** No additional external ports are required — Render should route traffic to port `80` inside the container. Backend runs internally on `3001` and is proxied by nginx.
+- **Image Tagging / Rollouts:** We recommend using immutable tags for production deployments:
+    - Use the GitHub Actions produced commit `SHA` tag to pin a specific image (recommended for reproducibility and rollbacks).
+    - Alternatively, use `latest` on the default branch for continuous deploys (convenient but less reproducible).
+- **WebSockets:** Ensure Render's load balancer and service settings allow WebSocket proxying so `/ws` upgrades are forwarded to the backend.
+
+Example: when creating/updating the Render service, set the image to `ghcr.io/<owner>/<repo>:<sha>` to deploy a specific build, or `ghcr.io/<owner>/<repo>:latest` for continuous deploys from `main`.
+
+Deployed App: https://thecodingplatform.onrender.com/
+
 ## Project Structure
 
 ```
