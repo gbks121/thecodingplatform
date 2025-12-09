@@ -110,18 +110,6 @@ jobs:
         service-id: ${{ secrets.RENDER_SERVICE_ID }}
         api-key: ${{ secrets.RENDER_API_KEY }}
         wait-for-success: true
-        
-    - name: Notify deployment status
-      if: always()
-      uses: 8398a7/action-slack@v3
-      with:
-        status: ${{ job.status }}
-        text: |
-          Deployment ${{ job.status }} for ${{ github.repository }}
-          Image: ${{ needs.build.outputs.image }}
-        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
   security-scan:
     name: Security Scan
