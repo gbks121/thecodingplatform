@@ -78,7 +78,9 @@ jobs:
         tags: |
           type=ref,event=branch
           type=ref,event=pr
-          type=sha,prefix={{branch}}-
+          # Add an immutable commit SHA tag for precise image references in Render
+          type=sha
+          # Keep `latest` for the default branch so Render can pull a stable tag
           type=raw,value=latest,enable={{is_default_branch}}
           
     - name: Build and push Docker image
