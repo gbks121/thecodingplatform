@@ -17,19 +17,3 @@ services:
     healthCheckPath: /health
     autoDeploy: true
     branch: main
-    
-    # Resource limits for free tier
-    scaling:
-      minInstances: 1
-      maxInstances: 1
-        
-# Optional: Add a static site if you want to serve frontend separately
-# - type: web
-#   name: thecodingplatform-frontend
-#   env: static
-#   buildCommand: npm run build:client
-#   staticPublishPath: ./apps/client/dist
-#   routes:
-#     - type: rewrite
-#       source: /*
-#       destination: /index.html
