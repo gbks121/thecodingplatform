@@ -11,6 +11,7 @@ export default defineConfig({
         },
     },
     test: {
+        watch: false,  // Always run once [web:config]
         globals: true,
         environment: "jsdom",
         setupFiles: "./src/test/setup.ts",
