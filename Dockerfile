@@ -18,6 +18,10 @@ COPY apps ./apps
 # Some base Node images may include older npm; pin to a modern npm here.
 RUN npm install -g npm@9 && npm --version
 RUN npm ci
+
+##DEBUG - REMOVE LATER
+RUN npm --version && node --version && ls -la node_modules && ls -la packages/shared && cat package.json
+
 # Build all packages in the correct order using the root script.
 # This runs `build:shared`, `build:server`, then `build:client`.
 RUN npm run build

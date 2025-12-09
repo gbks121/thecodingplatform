@@ -23,3 +23,6 @@ coverage
 *.lcov
 reports
 junit.xml
+
+# TypeScript incremental build info
+*.tsbuildinfo
