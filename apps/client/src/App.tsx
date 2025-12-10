@@ -4,12 +4,7 @@ import CodingSession from "./pages/CodingSession";
 
 function App() {
     return (
-        <BrowserRouter
-            future={{
-                v7_startTransition: true,
-                v7_relativeSplatPath: true,
-            }}
-        >
+        <BrowserRouter>
             <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/session/:sessionId" element={<CodingSession />} />

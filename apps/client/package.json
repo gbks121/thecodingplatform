@@ -22,7 +22,7 @@
         "monaco-editor": "^0.55.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
-        "react-router-dom": "^6.21.2",
+        "react-router-dom": "^7.10.1",
         "uuid": "^13.0.0",
         "ws": "^8.16.0",
         "y-monaco": "^0.1.5",
