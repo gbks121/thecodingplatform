@@ -8,7 +8,7 @@ import { User, Language } from "@thecodingplatform/shared";
 // through the same host (works in local and deployed environments).
 const WS_URL =
     typeof window !== "undefined"
-        ? `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws`
+        ? `${window.location.protocol === "https:" ? "wss" : "ws"}://localhost:3001/ws`
         : "ws://localhost:3001/ws";
 
 type ConnectionStatus = "connected" | "connecting" | "disconnected";
