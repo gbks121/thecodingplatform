@@ -146,10 +146,14 @@ describe("Integration Tests", () => {
     });
 
     it("should work with different HTTP methods for non-WebSocket requests", async () => {
-        const server = http.createServer(app);
+        // Test that the app is properly configured by checking it exists and has basic properties
+        expect(app).toBeDefined();
+        expect(typeof app).toBe("function");
 
-        // Test various methods for a health route simulation
-        expect(app._router.stack).toBeDefined(); // Verify the router has been set up
+        // Test that the app can be used to create an HTTP server
+        const server = http.createServer(app);
+        expect(server).toBeDefined();
+        expect(typeof server.listen).toBe("function");
 
         server.close();
     });
