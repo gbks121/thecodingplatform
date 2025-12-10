@@ -75,19 +75,30 @@ const CodingSession: React.FC = () => {
         const currentLang = languageRef.current; // Use ref to get fresh value
 
         if (currentLang === "typescript") {
-            try {
-                const worker =
-                    await monacoRef.current.languages.typescript.getTypeScriptWorker();
-                const model = editorRef.current.getModel();
-                if (!model) return;
-                const client = await worker(model.uri);
-                const result = await client.getEmitOutput(model.uri.toString());
-                const jsCode = result.outputFiles[0].text;
-                runCode(jsCode, "javascript");
-            } catch (e) {
-                console.error("Transpilation failed", e);
-                runCode(code, "javascript"); // Fallback or error
-            }
+            // For TypeScript, we need to transpile it to JavaScript before execution
+            // We'll use the TypeScript compiler that's already available in the project
+            // Import dynamically to avoid bundling issues
+            import("typescript")
+                .then((tsModule) => {
+                    const jsCode = tsModule.transpile(code, {
+                        target: tsModule.ScriptTarget.ES2016,
+                        module: tsModule.ModuleKind.ESNext,
+                        allowJs: true,
+                        lib: ["ES2016"],
+                        removeComments: false,
+                        noEmit: false,
+                        inlineSourceMap: false,
+                        inlineSources: true,
+                    });
+                    runCode(jsCode, "javascript");
+                })
+                .catch(() => {
+                    // Fallback if TypeScript import fails
+                    console.error(
+                        "TypeScript transpilation failed, running as JavaScript"
+                    );
+                    runCode(code, "javascript");
+                });
         } else {
             runCode(code, currentLang as "javascript" | "python");
         }
