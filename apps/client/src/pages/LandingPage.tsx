@@ -411,7 +411,7 @@ const FeatureCard: React.FC<{
     title: string;
     desc: string;
 }> = ({ icon, title, desc }) => (
-    <Grid item xs={12} md={4}>
+    <Grid size={{ xs: 12, md: 4 }}>
         <Card
             elevation={0}
             sx={{
