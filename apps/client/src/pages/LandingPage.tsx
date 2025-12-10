@@ -27,7 +27,7 @@ import { Language } from "@thecodingplatform/shared";
 import CodeIcon from "@mui/icons-material/Code";
 import GroupIcon from "@mui/icons-material/Group";
 import ChatIcon from "@mui/icons-material/Chat";
-import SpeedIcon from "@mui/icons-material/Speed";
+import FlashOnIcon from "@mui/icons-material/FlashOn";
 import BoltIcon from "@mui/icons-material/Bolt";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import ThemeToggle from "../components/ThemeToggle";
@@ -255,7 +255,7 @@ const LandingPage: React.FC = () => {
                         />
                         <FeatureCard
                             icon={
-                                <SpeedIcon
+                                <FlashOnIcon
                                     fontSize="large"
                                     sx={{ color: "#FFB74D" }}
                                 />

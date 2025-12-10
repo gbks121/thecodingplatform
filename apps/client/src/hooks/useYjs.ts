@@ -6,9 +6,10 @@ import { User, Language } from "@thecodingplatform/shared";
 
 // Use a same-origin `/ws` endpoint so the client connects to the server
 // through the same host (works in local and deployed environments).
-const WS_URL = (typeof window !== "undefined")
-    ? `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws`
-    : "ws://localhost:3001/ws";
+const WS_URL =
+    typeof window !== "undefined"
+        ? `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws`
+        : "ws://localhost:3001/ws";
 
 type ConnectionStatus = "connected" | "connecting" | "disconnected";
 
