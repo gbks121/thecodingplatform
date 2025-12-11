@@ -397,6 +397,8 @@ describe("Integration Tests", () => {
             ];
 
             malformedTestCases.forEach(({ input, expected }) => {
+                vi.mocked(setupWSConnection).mockClear();
+
                 const mockRequest = {
                     url: `/${input}`,
                     headers: { upgrade: "websocket" },
