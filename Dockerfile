@@ -1,4 +1,4 @@
-# Multi-stage Dockerfile for The Coding Platform
+# Multi-stage Dockerfile for The Coding Platform - Optimised
 # Uses Alpine Linux for minimal footprint
 
 # Stage 1: Build all packages together
@@ -13,12 +13,8 @@ COPY tsconfig.json ./
 COPY packages ./packages
 COPY apps ./apps
 
-# Install all dependencies
-# Ensure npm supports the `workspace:` protocol (npm v7+).
-# Some base Node images may include older npm; pin to a modern npm here.
-# RUN npm install -g npm@9 && npm --version
+# Install all dependencies (including dev for build)
 RUN npm ci
-
 
 # Remove any stray TypeScript incremental build files left in the context
 # to ensure `tsc` performs a fresh build in CI/docker.
@@ -28,7 +24,22 @@ RUN find . -name "*.tsbuildinfo" -delete || true
 # This runs `build:shared`, `build:server`, then `build:client`.
 RUN npm run build
 
-# Stage 2: Production image
+# Stage 2: Production dependencies only
+FROM node:lts-alpine AS deps
+
+WORKDIR /app
+
+# Copy root package.json for workspace structure
+COPY package*.json ./
+
+# Copy only the backend package files for production dependencies
+COPY apps/server/package.json ./apps/server/package.json
+COPY backend-package.json ./
+
+# Install ONLY production dependencies using backend-package.json
+RUN npm install --omit=dev
+
+# Stage 3: Final production image
 FROM node:lts-alpine AS final
 
 # Install nginx for serving frontend
@@ -46,14 +57,15 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/client/dist ./frontend
 
 # Copy built backend files
 COPY --from=builder --chown=nextjs:nodejs /app/apps/server/dist ./backend
-COPY --from=builder --chown=nextjs:nodejs /app/apps/server/package.json ./backend/
-COPY backend-package.json /app/backend/package.json
 
 # Copy shared package
 COPY --from=builder --chown=nextjs:nodejs /app/packages/shared ./packages/shared
 
-# Copy production node_modules (only backend dependencies needed)
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+# Copy production dependencies only (from deps stage)
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+
+# Copy backend package.json for reference
+COPY --from=deps --chown=nextjs:nodejs /app/backend-package.json ./backend-package.json
 
 # Create nginx configuration directory and file
 RUN mkdir -p /etc/nginx/conf.d
