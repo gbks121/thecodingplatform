@@ -18,7 +18,7 @@ A real-time collaborative coding environment designed for technical interviews a
 
 ### Frontend (`apps/client`)
 
-- **Framework**: React 18, Vite
+- **Framework**: React 19, Vite
 - **Language**: TypeScript
 - **Styling**: Material UI (MUI)
 - **Editor**: Monaco Editor (`@monaco-editor/react`)
