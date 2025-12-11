@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import http from "http";
 import app from "../app";
 import { handleUpgrade } from "../yjsWebsocket";
-import { setupWSConnection } from "y-websocket/bin/utils";
+import { setupWSConnection } from "@y/websocket-server/utils";
 
-// Mock the y-websocket module with a factory function
-vi.mock("y-websocket/bin/utils", () => {
+// Mock the @y/websocket-server module with a factory function
+vi.mock("@y/websocket-server/utils", () => {
     const mockSetupWSConnection = vi.fn();
     return {
         setupWSConnection: mockSetupWSConnection,

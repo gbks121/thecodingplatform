@@ -11,8 +11,8 @@ import request from "supertest";
 import app from "../app";
 import { handleUpgrade } from "../yjsWebsocket";
 
-// Mock the y-websocket module with a factory function
-vi.mock("y-websocket/bin/utils", () => {
+// Mock the @y/websocket-server module with a factory function
+vi.mock("@y/websocket-server/utils", () => {
     const mockSetupWSConnection = vi.fn();
     return {
         setupWSConnection: mockSetupWSConnection,
@@ -75,6 +75,7 @@ describe("Error Handling", () => {
         const mockSocket = {
             on: vi.fn(),
             send: vi.fn(),
+            close: vi.fn(),
         } as unknown as import("ws").WebSocket;
 
         const mockHead = Buffer.from([]);
@@ -93,6 +94,7 @@ describe("Error Handling", () => {
         const mockSocket = {
             on: vi.fn(),
             send: vi.fn(),
+            close: vi.fn(),
         } as unknown as import("ws").WebSocket;
 
         const mockHead = Buffer.from([]);
@@ -111,6 +113,7 @@ describe("Error Handling", () => {
         const mockSocket = {
             on: vi.fn(),
             send: vi.fn(),
+            close: vi.fn(),
         } as unknown as import("ws").WebSocket;
 
         const mockHead = Buffer.from([]);
